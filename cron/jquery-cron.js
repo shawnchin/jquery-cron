@@ -392,7 +392,7 @@
                 error : function() {
                     alert("An error occured when submitting your request. Try again?");
                     btn.removeClass("cron-loading");
-                },
+                }
             });
         }
     };
