@@ -303,7 +303,7 @@
                 "hour"  : d[1],
                 "dom"   : d[2],
                 "month" : d[3],
-                "dow"   : d[4],
+                "dow"   : d[4]
             };
 
             // update appropriate select boxes
@@ -375,7 +375,7 @@
 
             if (btn.hasClass("cron-loading")) { return; } // in progress
             btn.addClass("cron-loading");
-           
+
             $.ajax({
                 type : "POST",
                 url  : root.data("options").url_set,
