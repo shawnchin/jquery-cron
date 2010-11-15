@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+    <title>jquery-cron : a jQuery plugin</title>
     <link type="text/css" href="https://github.com/shawnchin/jquery-gentleSelect/raw/master/gentleSelect/jquery-gentleSelect.css" rel="stylesheet" />
     <link type="text/css" href="cron/jquery-cron.css" rel="stylesheet" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
@@ -32,11 +33,6 @@
             onChange: function() {
                 $('#example1-val').text($(this).cron("value"));
             }
-        });
-
-        $('#example2').cron({
-            initial: "42 3 * * 5",
-            url_set: "/"
         });
     });
     </script>
@@ -175,13 +171,6 @@
     If a non-error HTTP response is received, the save is considered to be successfule and 
     the "save" icon will be hidden until the next change is made.
     </p>
-    
-    <p>Try out this example:</p>
-
-    <div class='example'>
-    <div id='example2'></div>
-    </div>
-
     
     
     <h3 id='option-onchange'>onChange</h3>
