@@ -40,8 +40,8 @@ Copyright (c) 2010, Shawn Chin.
 
 This project is licensed under the [MIT license].
 
- [jQuery] : http://jquery.com "jQuery"
- [jquery-cron] : http://shawnchin.github.com/jquery-cron "jquery-cron"
+ [jQuery]: http://jquery.com "jQuery"
+ [jquery-cron]: http://shawnchin.github.com/jquery-cron "jquery-cron"
  [BBotUI Project]: https://github.com/shawnchin/bbotui "BBotUI project"
  [jquery-gentleSelect]: http://shawnchin.github.com/jquery-gentleSelect "jquery-gentleSelect"
  [MIT License]: http://www.opensource.org/licenses/mit-license.php "MIT License"
