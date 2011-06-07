@@ -34,6 +34,13 @@
                 $('#example1-val').text($(this).cron("value"));
             }
         });
+        $('#example2').cron({
+            initial: "42 3 * * 5",
+            effectOpts: {
+                openEffect: "fade",
+                openSpeed: "slow"
+            }
+        });
     });
     </script>
 </head>
@@ -59,21 +66,14 @@
     </div>
 
     <p>
-    This plugin was developed to fulfil the requirements that arose from the 
-    <a href='http://github.com/shawnchin/bbotui'>BBotUI</a> Project. 
-    As such, while we do try to make the implementation as generic as possible, we dare not 
-    claim this plugin to be as flexible as one would expect a sensible jQuery plugin to be.
-    </p>
-
-    <p>
-    There is much to be done on the flexibility and robustness front, and we welcome contributions 
+    There is much room for improvements, and we welcome contributions 
     and bug fixes. Feel free to fork <a href='https://github.com/shawnchin/jquery-cron'>the project</a> 
     and send us pull requests!
     </p>
 
     <h2>Download</h2>
     <ul>
-        <li>Latest Release : <a href='https://github.com/shawnchin/jquery-cron/zipball/v0.1.1'>jquery-cron v0.1.1</a></li>
+        <li>Latest Release : <a href='https://github.com/shawnchin/jquery-cron/zipball/v0.1.2'>jquery-cron v0.1.2</a></li>
         <li>If you're feeling brave, download the <a href='https://github.com/shawnchin/jquery-cron/zipball/master'>Development Version</a></li>
     </ul>
 
@@ -186,9 +186,75 @@ $('#example1').cron({
     onChange: function() {
         $('#example1-val').text($(this).cron("value"));
     }
+});</pre>
+
+
+
+    <h3 id='option-effectopts'>effectOpts</h3>
+    <p>
+        You can change the effects used when displaying/hiding the selection menu by changing the
+        parameters in effectOpts. These values will be used as the default options for <tt>gentleSelect</tt>.
+    </p>
+
+    <p>
+        The following parameters can be set:
+        <ul>
+            <li><a href='http://shawnchin.github.com/jquery-gentleSelect/#option-effect'>openEffect</a> (default: <tt>'slide'</tt>)</li>
+            <li><a href='http://shawnchin.github.com/jquery-gentleSelect/#option-effect'>closeEffect</a> (default: <tt>'slide'</tt>)</li>
+            <li><a href='http://shawnchin.github.com/jquery-gentleSelect/#option-speed'>openSpeed</a> (default: <tt>400</tt>)</li>
+            <li><a href='http://shawnchin.github.com/jquery-gentleSelect/#option-speed'>closeSpeed</a> (default: <tt>400</tt>)</li>
+            <li><a href='http://shawnchin.github.com/jquery-gentleSelect/#option-mouseout'>hideOnMouseOut</a> (default: <tt>true</tt>)</li>
+        </ul>
+    </p>
+
+    <p>
+        For example, the following uses the <tt>fade</tt> effect with a slower animation speed:
+    </p>
+
+    <p>
+        <div id='example2'></div>
+        <pre>
+$('#example2').cron({
+    initial: "42 3 * * 5",
+    effectOpts: {
+        openEffect: "fade",
+        openSpeed: "slow"
+    }
+});</pre>
+    </p>
+
+    <h3 id='option-each-element'>Customising individual select boxes</h3>
+    <p>
+        It is possible to customise each of the generated select boxes by sending additional
+        options to its instance of <tt>gentleSelect</tt>. 
+        All <a href='http://shawnchin.github.com/jquery-gentleSelect/#option-title'>attributes 
+        support by jquery-gentleSelect</a> can be specified.
+    </p>
+
+    <p>
+        The following are the options to use for each select menu:
+        <ul>
+            <li><tt>minuteOpts</tt> - Minutes past the hour (hourly)</li>
+            <li><tt>timeMinuteOpts</tt> - Time:Minute  (daily, weekly, monthly, yearly)</li>
+            <li><tt>timeHourOpts</tt> - Time:Hour  (daily, weekly, monthly, yearly)</li>
+            <li><tt>dowOpts</tt> - Day of week  (weekly)</li>
+            <li><tt>domOpts</tt> - Day of month  (monthly, yearly)</li>
+            <li><tt>monthOpts</tt> - Month (yearly)</li>
+        </ul>
+    </p>
+
+    <p>
+        For example, to change the title of the "Day of Month" select box which appears for monthly and yearly crons:
+        <pre>
+$('#selector').cron({
+    initial: "42 3 * * 5",
+    domOpts: {
+        title: "N-th day of the month"
+    }
 });
 </pre>
 
+    </p>
     <h2>Methods</h2>
     <h3 id='method-value'>value</h3>
     <p>
