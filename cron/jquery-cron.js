@@ -84,6 +84,13 @@
             rows      : undefined,
             title     : "Time: Minute"
         },
+        effectOpts : {
+            openSpeed      : 400,
+            closeSpeed     : 400,
+            openEffect     : "slide",
+            closeEffect    : "slide",
+            hideOnMouseOut : true
+        },
         url_set : undefined,
         onChange: undefined // callback function each time value changes
     };
@@ -242,13 +249,14 @@
             
             // init options
             var o = $.extend([], defaults, options);
+            var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
             $.extend(o, { 
-                minuteOpts     : $.extend({}, defaults.minuteOpts, options.minuteOpts), 
-                domOpts        : $.extend({}, defaults.domOpts, options.domOpts), 
-                monthOpts      : $.extend({}, defaults.monthOpts, options.monthOpts), 
-                dowOpts        : $.extend({}, defaults.dowOpts, options.dowOpts), 
-                timeHourOpts   : $.extend({}, defaults.timeHourOpts, options.timeHourOpts), 
-                timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, options.timeMinuteOpts)
+                minuteOpts     : $.extend({}, defaults.minuteOpts, eo, options.minuteOpts), 
+                domOpts        : $.extend({}, defaults.domOpts, eo, options.domOpts), 
+                monthOpts      : $.extend({}, defaults.monthOpts, eo, options.monthOpts), 
+                dowOpts        : $.extend({}, defaults.dowOpts, eo, options.dowOpts), 
+                timeHourOpts   : $.extend({}, defaults.timeHourOpts, eo, options.timeHourOpts), 
+                timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts)
             });
             
             // error checking
@@ -264,7 +272,7 @@
                 .find("select")
                     .bind("change.cron", event_handlers.periodChanged)
                     .data("root", this)
-                    .gentleSelect()
+                    .gentleSelect(eo)
                     .end();
             
             block["dom"] = $("<span class='cron-block cron-block-dom'>"
