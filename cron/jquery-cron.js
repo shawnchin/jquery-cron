@@ -42,9 +42,51 @@
     
     var defaults = {
         initial : "* * * * *",
+        minuteOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 30,
+            columns   : 4,
+            rows      : undefined,
+            title     : "Minutes Past the Hour"
+        },
+        timeHourOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 20,
+            columns   : 2,
+            rows      : undefined,
+            title     : "Time: Hour"
+        },
+        domOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 30,
+            columns   : undefined,
+            rows      : 10,
+            title     : "Day of Month"
+        },
+        monthOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 100,
+            columns   : 2,
+            rows      : undefined,
+            title     : undefined
+        },
+        dowOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : undefined,
+            columns   : undefined,
+            rows      : undefined,
+            title     : undefined
+        },
+        timeMinuteOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 20,
+            columns   : 4,
+            rows      : undefined,
+            title     : "Time: Minute"
+        },
         url_set : undefined,
         onChange: undefined // callback function each time value changes
-    }
+    };
     
     // -------  build some static data -------
     
@@ -69,7 +111,6 @@
         else if (i == 2 || i == 22) { var suffix = "nd"; } 
         else if (i == 3 || i == 23) { var suffix = "rd"; } 
         else { var suffix = "th"; }
-
         str_opt_dom += "<option value='"+i+"'>" + i + suffix + "</option>\n"; 
     }
 
@@ -201,6 +242,15 @@
             
             // init options
             var o = $.extend([], defaults, options);
+            $.extend(o, { 
+                minuteOpts     : $.extend({}, defaults.minuteOpts, options.minuteOpts), 
+                domOpts        : $.extend({}, defaults.domOpts, options.domOpts), 
+                monthOpts      : $.extend({}, defaults.monthOpts, options.monthOpts), 
+                dowOpts        : $.extend({}, defaults.dowOpts, options.dowOpts), 
+                timeHourOpts   : $.extend({}, defaults.timeHourOpts, options.timeHourOpts), 
+                timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, options.timeMinuteOpts)
+            });
+            
             // error checking
             if (hasError(this, o)) { return this; }
 
@@ -223,7 +273,7 @@
                 .appendTo(this)
                 .data("root", this)
                 .find("select")
-                    .gentleSelect({rows:10,itemWidth:30, title: "Day of Month"})
+                    .gentleSelect(o.domOpts)
                     .data("root", this)
                     .end();
 
@@ -233,7 +283,7 @@
                 .appendTo(this)
                 .data("root", this)
                 .find("select")
-                    .gentleSelect({columns:2,itemWidth:100})
+                    .gentleSelect(o.monthOpts)
                     .data("root", this)
                     .end();
 
@@ -243,7 +293,7 @@
                 .appendTo(this)
                 .data("root", this)
                 .find("select")
-                    .gentleSelect({columns:4,itemWidth:30, title: "Minutes Past the Hour"})
+                    .gentleSelect(o.minuteOpts)
                     .data("root", this)
                     .end();
 
@@ -253,7 +303,7 @@
                 .appendTo(this)
                 .data("root", this)
                 .find("select")
-                    .gentleSelect()
+                    .gentleSelect(o.dowOpts)
                     .data("root", this)
                     .end();
 
@@ -264,11 +314,11 @@
                 .appendTo(this)
                 .data("root", this)
                 .find("select.cron-time-hour")
-                    .gentleSelect({columns:2,itemWidth:20, title: "Time: Hour"})
+                    .gentleSelect(o.timeHourOpts)
                     .data("root", this)
                     .end()
                 .find("select.cron-time-min")
-                    .gentleSelect({columns:4,itemWidth:20, title: "Time: Minute"})
+                    .gentleSelect(o.timeMinuteOpts)
                     .data("root", this)
                     .end();
 
