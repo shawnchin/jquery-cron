@@ -92,7 +92,8 @@
             hideOnMouseOut : true
         },
         url_set : undefined,
-        onChange: undefined // callback function each time value changes
+        onChange: undefined, // callback function each time value changes
+        extraValues: undefined
     };
     
     // -------  build some static data -------
@@ -132,18 +133,16 @@
     
     // options for day of week
     var str_opt_dow = "";
-    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-                "Friday", "Saturday"];
+    var days = ["Monday", "Tuesday", "Wednesday", "Thursday",
+                "Friday", "Saturday", "Sunday"];
     for (var i = 0; i < days.length; i++) {
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n"; 
     }
 
     // options for period
     var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
-    for (var i = 0; i < periods.length; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n"; 
-    }
+    var periods = ["minute", "hour", "day", "week", "month",/* "year"*/];
+   
     
     // display matrix
     var toDisplay = {
@@ -202,16 +201,27 @@
     }
 
     function hasError(c, o) {
+    	if( findExtraValueIndex(o) >=0) {return false;}
         if (!defined(getCronType(o.initial))) { return true; }
         return false;
     }
 
     function getCurrentValue(c) {
+    	
         var b = c.data("block");
+  
         var min = hour = day = month = dow = "*";
-
-        switch (b["period"].find("select").val()) {
-            case "hour":
+        
+        var select=b["period"].find("select");
+        var sel=select.val();
+        
+        var extraVal = select.data("newVal");//little hack here for first-time issue of setting custom values
+        if (extraVal)
+        	sel=extraVal;
+        select.removeData("newVal");
+        switch (sel) {
+        	
+        	case "hour":
                 min = b["mins"].find("select").val();
                 break;
 
@@ -238,15 +248,41 @@
                 day  = b["dom"].find("select").val();
                 month = b["month"].find("select").val();
                 break;
+            default:	
+            	var opts= c.data('options');
+            	 if(opts.extraValues)
+        		 {
+	            	 for (var i = 0; i < opts.extraValues.length; i++) {	
+	                 	if(	opts.extraValues[i][0] == sel)
+	                 		return opts.extraValues[i][1];
+	                 }
+        		 }
+        		break;
         }
         return [min, hour, day, month, dow].join(" ");
+    }
+    
+    function findExtraValueIndex(o)
+    {
+       if(o.extraValues)
+     	{
+	            for (var i = 0; i < o.extraValues.length; i++) 
+	            {	
+		            if (o.initial == o.extraValues[i][1])
+	         		{
+		            		return i;
+	         		}
+	            }
+     	}
+       return -1;
+    	
     }
 
     // -------------------  PUBLIC METHODS -----------------
 
     var methods = {
         init : function(options) {
-            
+   
             // init options
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
@@ -259,11 +295,37 @@
                 timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts)
             });
             
+           
             // error checking
             if (hasError(this, o)) { return this; }
-
+            
+            //extra vals
+            var extraVal=null;
+            var extraValIndx = findExtraValueIndex(o);
+            if(extraValIndx>=0)
+            	extraVal=o.extraValues[extraValIndx];
+          
+            if(o.extraValues)
+        	{
+	            for (var i = 0; i < o.extraValues.length; i++) 
+	            {
+	            	var newVal=o.extraValues[i][0];
+	            	if(jQuery.inArray(newVal,periods) == -1)
+	            		periods.push(newVal);
+	            	
+	            	//TODO FIXME this will build up forever
+	            	toDisplay[newVal]=new Array();
+	            }
+        	}
+            str_opt_period ="";
+            for (var i = 0; i < periods.length; i++) 
+            {
+                str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";  
+            }
+            
+            
+        	
             // ---- define select boxes in the right order -----
-
             var block = []
             block["period"] = $("<span class='cron-period'>"
                     + "Every <select name='cron-period'>" + str_opt_period 
@@ -340,18 +402,24 @@
                     .data("root", this)
                     .end();
 
+          
             this.find("select").bind("change.cron-callback", event_handlers.somethingChanged);
             this.data("options", o).data("block", block); // store options and block pointer
-            this.data("current_value", o.initial); // remember base value to detect changes
-            
-            return methods["value"].call(this, o.initial); // set initial value
+            this.data("current_value", o.initial); // remember base value to detect changes            
+
+            return methods["value"].call(this, o.initial, extraVal); // set initial value
         },
 
-        value : function(cron_str) {
-            // when no args, act as getter
+        value : function(cron_str, extraVal) {
+        	var t;
+        	// when no args, act as getter
             if (!cron_str) { return getCurrentValue(this); }
 
-            var t = getCronType(cron_str);
+            if (extraVal )
+            	t=extraVal[0];
+            else t = getCronType(cron_str);
+            
+           // log(t);
             if (!defined(t)) { return false; }
 
             var block = this.data("block");
@@ -363,7 +431,7 @@
                 "month" : d[3],
                 "dow"   : d[4]
             };
-
+            
             // update appropriate select boxes
             var targets = toDisplay[t];
             for (var i = 0; i < targets.length; i++) {
@@ -380,14 +448,31 @@
                     block[tgt].find("select").val(v[tgt]).gentleSelect("update");
                 }
             }
-            
+            if( extraVal )
+            	t = extraVal[0];
+           
             // trigger change event
-            block["period"].find("select")
-                .val(t)
-                .gentleSelect("update")
-                .trigger("change");
+            var select=block["period"].find("select");
+            select.val(t).gentleSelect("update");
+           
+            if(extraVal)//this was needed as the onchange events didn't respect the new vals immediately
+            	select.data('newVal',t)
+        	else select.removeData('newVal');
+            
+            var e = jQuery.Event("change");
+            select.trigger(e);
 
             return this;
+        },
+        readonly: function()
+        {
+        	var me = $(this);
+        	 $(this).show()
+			 	.find("ul,select,:hidden").remove().hide();
+        	 me.parent().find(".newText").remove();
+			 var newText = $(this).text();
+			 me.parent().append("<span class='newText'>"+newText+"</span>");
+			 me.html("");
         }
 
     };
@@ -398,9 +483,12 @@
             var block = root.data("block");
             var b = toDisplay[$(this).val()];
             
-            root.find("span.cron-block").hide(); // first, hide all blocks            
-            for (var i = 0; i < b.length; i++) {
-                block[b[i]].show();
+            root.find("span.cron-block").hide(); // first, hide all blocks      
+            if(b)
+        	{
+	            for (var i = 0; i < b.length; i++) {
+	                block[b[i]].show();
+	            }
             }
         },
 
