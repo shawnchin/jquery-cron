@@ -201,7 +201,7 @@
     }
 
     function hasError(c, o) {
-        if( findExtraValueIndex(o) >=0) {return false;}
+    	if( findExtraValueIndex(o) >=0) {return false;}
         if (!defined(getCronType(o.initial))) { return true; }
         return false;
     }
@@ -214,7 +214,8 @@
         
         var select=b["period"].find("select");
         var sel=select.val();
-        var extraVal = select.data("newVal");
+        
+        var extraVal = select.data("newVal");//little hack here for first-time issue of setting custom values
         if (extraVal)
         	sel=extraVal;
         select.removeData("newVal");
@@ -263,7 +264,6 @@
     
     function findExtraValueIndex(o)
     {
-   //   linspect(o.extraValues);
        if(o.extraValues)
      	{
 	            for (var i = 0; i < o.extraValues.length; i++) 
@@ -320,20 +320,12 @@
             str_opt_period ="";
             for (var i = 0; i < periods.length; i++) 
             {
-            	var selected='';
-            	
-            	if (i == extraValIndx)
-            		{
-            	//	log(i +" : "+extraValIndx);
-            	//	selected="selected='selected'";
-            		}
-                str_opt_period += "<option value='"+periods[i]+"' "+selected+">" + periods[i] + "</option>\n";  
+                str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";  
             }
             
             
         	
             // ---- define select boxes in the right order -----
-           // str_opt_period="";
             var block = []
             block["period"] = $("<span class='cron-period'>"
                     + "Every <select name='cron-period'>" + str_opt_period 
@@ -413,13 +405,9 @@
           
             this.find("select").bind("change.cron-callback", event_handlers.somethingChanged);
             this.data("options", o).data("block", block); // store options and block pointer
-            this.data("current_value", o.initial); // remember base value to detect changes
-  
-            
-          
-         
+            this.data("current_value", o.initial); // remember base value to detect changes            
+
             return methods["value"].call(this, o.initial, extraVal); // set initial value
-           // else return this;
         },
 
         value : function(cron_str, extraVal) {
@@ -443,8 +431,7 @@
                 "month" : d[3],
                 "dow"   : d[4]
             };
-
-         //   linspect(t);
+            
             // update appropriate select boxes
             var targets = toDisplay[t];
             for (var i = 0; i < targets.length; i++) {
@@ -461,11 +448,9 @@
                     block[tgt].find("select").val(v[tgt]).gentleSelect("update");
                 }
             }
-          //  log(extraVal[0]);
             if( extraVal )
             	t = extraVal[0];
            
-           // log(t);
             // trigger change event
             var select=block["period"].find("select");
             select.val(t).gentleSelect("update");
@@ -478,6 +463,16 @@
             select.trigger(e);
 
             return this;
+        },
+        readonly: function()
+        {
+        	var me = $(this);
+        	 $(this).show()
+			 	.find("ul,select,:hidden").remove().hide();
+        	 me.parent().find(".newText").remove();
+			 var newText = $(this).text();
+			 me.parent().append("<span class='newText'>"+newText+"</span>");
+			 me.html("");
         }
 
     };
