@@ -23,7 +23,7 @@ and send us pull requests!
 ## Usage
 
 To use this plugin, one simply needs to load [jQuery], [jquery-gentleSelect] 
-and the JS/CSS scripts for jquery-cron, then attach it an empty <DIV>
+and the JS/CSS scripts for jquery-cron, then attach it an empty `<DIV>`
 on DOM ready:
 
     $(document).ready(function() {
