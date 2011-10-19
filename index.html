@@ -41,6 +41,16 @@
                 openSpeed: "slow"
             }
         });
+        $('#example3').cron({
+            initial: "42 3 * * 5",
+            onChange: function() {
+                $('#example3-val').text($(this).cron("value"));
+            },
+            customValues: {
+                "5 Minutes" : "*/5 * * * *",
+                "2 Hours on Weekends" : "0 */2 * * 5,6"
+            }
+        });
     });
     </script>
 </head>
@@ -66,7 +76,13 @@
     </div>
 
     <p>
-    There is much room for improvements, and we welcome contributions 
+    In addition, the <a href='#option-customvalues'><tt>customValues</tt></a>
+    option can be used to provide a list of canned cron entries. This allow users to
+    cater for common use cases as well as enable more complex cron entries.
+    </p>
+    
+    <p>
+    There is much room for improvements and we welcome contributions
     and bug fixes. Feel free to fork <a href='https://github.com/shawnchin/jquery-cron'>the project</a> 
     and send us pull requests!
     </p>
@@ -254,6 +270,43 @@ $('#selector').cron({
 });
 </pre>
 
+    </p>
+
+    <h3 id='option-customvalues'>Adding custom values</h3>
+    <p>
+    Additional entries can be included in the period selection using the <tt>customValues</tt>
+    option. This allows you to specify more complex cron entries that is not currently expressible
+    using the current setup.
+    </p>
+    <p>
+    For example, the following adds two additional entries to the selection:
+        <pre>
+$('#selector').cron({
+    customValues: {
+        "5 Minutes" : "*/5 * * * *",
+        "2 Hours on Weekends" : "0 */2 * * 5,6"
+    }
+});
+</pre>
+    </p>
+
+    <div class='example'>
+        <div id='example3'></div>
+        <p>Generated cron entry: <span class='example-text' id='example3-val'></span></p>
+    </div>
+
+    <p>
+    <b>Caveats:</b>
+    <ul>
+        <li>
+            At present, cron entries specified in <tt>customValues</tt> are not validated.
+            It is down to the implementer to ensure that provided values are as required.
+        </li>
+        <li>
+            The <a href='#method-value'><tt>value</tt></a> method can be used to retrieve
+            custom cron values. However, it cannot be used to set custom values.
+        </li>
+    </ul>
     </p>
     <h2>Methods</h2>
     <h3 id='method-value'>value</h3>
