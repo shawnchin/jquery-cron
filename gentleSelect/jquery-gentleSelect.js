@@ -27,6 +27,8 @@
         columns   : undefined,
         rows      : undefined,
         title     : undefined,
+        prompt    : "Make A Selection",
+        maxDisplay: 0,  // set to 0 for unlimited
         openSpeed       : 400,
         closeSpeed      : 400,
         openEffect      : "slide",
@@ -40,10 +42,6 @@
     }
 
     function hasError(c, o) {
-        if (c.attr("multiple") == true) {
-            $.error("Sorry, gentleSelect does not work with multiple=true yet");
-            return true;
-        }
         if (defined(o.columns) && defined(o.rows)) {
             $.error("gentleSelect: You cannot supply both 'rows' and 'columns'");
             return true;
@@ -81,6 +79,20 @@
         return false;
     }
 
+    function getSelectedAsText(elemList, opts) { 
+        // If no items selected, return prompt
+        if (elemList.length < 1) { return opts.prompt; }
+
+        // Truncate if exceed maxDisplay
+        if (opts.maxDisplay != 0 && elemList.length > opts.maxDisplay) {
+            var arr = elemList.slice(0, opts.maxDisplay).map(function(){return $(this).text();});
+            arr.push("...");
+        } else {
+            var arr = elemList.map(function(){return $(this).text();});
+        }
+        return arr.get().join(", ");
+    }
+
     var methods = {
         init : function(options) {
             var o = $.extend({}, defaults, options);
@@ -89,7 +101,8 @@
             this.hide(); // hide original select box
             
             // initialise <span> to replace select box
-            var label = $("<span class='gentleselect-label'>" + this.find(":selected").text() + "</span>")
+            label_text = getSelectedAsText(this.find(":selected"), o);
+            var label = $("<span class='gentleselect-label'>" + label_text + "</span>")
                 .insertBefore(this)
                 .bind("mouseenter.gentleselect", event_handlers.labelHoverIn)
                 .bind("mouseleave.gentleselect", event_handlers.labelHoverOut)
@@ -117,7 +130,7 @@
                 .data("label", label)
                 .data("root", this);
             this.data("dialog", dialog);
-
+           
             // if to be displayed in columns
             if (defined(o.columns) || defined(o.rows)) {
 
@@ -174,16 +187,20 @@
         // if select box was updated externally, we need to bring everything
         // else up to speed.
         update : function() {
-            var root = this;
-            var v = this.val(); // current value of select box
-            this.data("dialog").find("li").each(function() {
-                if ($(this).data("value") == v) {
-                    $(this).addClass("selected");
-                    root.data("label").text($(this).data("name"));
-                } else {
-                    $(this).removeClass("selected");
-                };
+            var opts = this.data("options");
+
+            // Update li with selected data
+            var v = (this.attr("multiple")) ? this.val() : [this.val()];
+            $("li", this.data("dialog")).each(function() {
+                var $li = $(this);
+                var isSelected = ($.inArray($li.data("value"), v) != -1);
+                $li.toggleClass("selected", isSelected);
             });
+
+            // Update label
+            var label = getSelectedAsText(this.find(":selected"), opts);
+            this.data("label").text(label);
+            
             return this;
         }
     };
@@ -199,11 +216,12 @@
         },
 
         labelClick : function() {
-            var pos = $(this).position();
-            var root = $(this).data("root");
+            var $this = $(this);
+            var pos = $this.position();
+            var root = $this.data("root");
             var opts = root.data("options");
             var dialog = root.data("dialog")
-                .css("top", pos.top + root.height())
+                .css("top", pos.top + $this.height())
                 .css("left", pos.left + 1);
             if (opts.openEffect == "fade") {
                 dialog.fadeIn(opts.openSpeed);
@@ -213,32 +231,41 @@
         },
     
         dialogHoverOut : function() {
-            if ($(this).data("root").data("options").hideOnMouseOut) {
-                $(this).hide();
+            var $this = $(this);
+            if ($this.data("root").data("options").hideOnMouseOut) {
+                $this.hide();
             }
         },
 
         dialogClick : function(e) {
             var clicked = $(e.target);
-            var opts = $(this).data("root").data("options");
+            var $this = $(this);
+            var opts = $this.data("root").data("options");
             if (opts.closeEffect == "fade") {
-                $(this).fadeOut(opts.closeSpeed);
+                $this.fadeOut(opts.closeSpeed);
             } else {
-                $(this).slideUp(opts.closeSpeed);
+                $this.slideUp(opts.closeSpeed);
             }
 
             if (clicked.is("li") && !clicked.hasClass("gentleselect-dummy")) {
                 var value = clicked.data("value");
                 var name = clicked.data("name");
-                var label = $(this).data("label")
-                    .text(name); // update label
+                var label = $this.data("label")
 
-                // update selected li
-                $(this).find("li.selected").removeClass("selected");
-                clicked.addClass("selected");
-                // update actual selectbox
-                var actual = $(this).data("root").val(value).trigger("change");
-                
+                if ($this.data("root").attr("multiple")) {
+                    clicked.toggleClass("selected");
+                    var s = $this.find("li.selected");
+                    label.text(getSelectedAsText(s, opts));
+                    var v = s.map(function(){ return $(this).data("value"); });
+                    // update actual selectbox and trigger change event
+                    $this.data("root").val(v.get()).trigger("change");
+                } else {
+                    $this.find("li.selected").removeClass("selected");
+                    clicked.addClass("selected");
+                    label.text(clicked.data("name"));
+                    // update actual selectbox and trigger change event
+                    $this.data("root").val(value).trigger("change");
+                }
             }
         },
 
