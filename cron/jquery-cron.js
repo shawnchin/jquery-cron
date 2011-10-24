@@ -258,9 +258,10 @@
     // -------------------  PUBLIC METHODS -----------------
 
     var methods = {
-        init : function(options) {
+        init : function(opts) {
             
             // init options
+            var options = opts ? opts : {}; /* default to empty obj */
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
             $.extend(o, { 
