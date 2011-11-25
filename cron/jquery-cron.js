@@ -42,6 +42,13 @@
 
     var defaults = {
         initial : "* * * * *",
+	everyNminuteOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 30,
+            columns   : 4,
+            rows      : undefined,
+            title     : "Every N minutes"
+        },
         minuteOpts : {
             minWidth  : 100, // only applies if columns and itemWidth not set
             itemWidth : 30,
@@ -112,6 +119,13 @@
         str_opt_hid += "<option value='"+i+"'>" + j + i + "</option>\n";
     }
 
+    //options for Every N minutes
+    var str_opt_enm = "";
+    for (var i = 0; i < 60; i++) {
+        var j = (i < 10)? "0":"";
+        str_opt_enm += "<option value='"+"*/"+i+"'>" + j +  i + "</option>\n";
+    }
+
     // options for days of month
     var str_opt_dom = "";
     for (var i = 1; i < 32; i++) {
@@ -141,7 +155,7 @@
 
     // options for period
     var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
+    var periods = ["everyNmins","minute", "hour", "day", "week", "month", "year"];
     for (var i = 0; i < periods.length; i++) {
         str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
     }
@@ -149,7 +163,7 @@
     // display matrix
     var toDisplay = {
         "minute" : [],
-        "everyNminute" : ["everyNmins"],
+        "everyNmins" : ["everyNmins"],
         "hour"   : ["mins"],
         "day"    : ["time"],
         "week"   : ["dow", "time"],
@@ -158,7 +172,7 @@
     };
 
     var combinations = {
-        "everyNminute" : /^\*\/\d{1,2}\s(\*\s){3}\*$/,  // "*/? * * * *"
+        "everyNmins" : /^\*\/\d{1,2}\s(\*\s){3}\*$/,  // "*/? * * * *"
         "minute" : /^(\*\s){4}\*$/,               // "* * * * *"
         "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,      // "? * * * *"
         "day"    : /^(\d{1,2}\s){2}(\*\s){2}\*$/, // "? ? * * *"
@@ -179,7 +193,6 @@
     
     function getCronType(cron_str) {
         // check format of initial cron value
-        // var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
         var valid_cron = /^((\d{1,2}|\*|\*\/\d{1,2})\s){4}(\d{1,2}|\*)$/
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
@@ -209,6 +222,7 @@
 
         // unknown combination
         $.error("cron: valid but unsupported cron format. sorry.");
+	alert(cron_str);
         return undefined;
     }
 
@@ -223,6 +237,11 @@
         var min = hour = day = month = dow = "*";
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
+
+	    case "everyNmins":
+                min = b["everyNmins"].find("select").val();
+		break;
+
             case "minute":
                 break;
                 
@@ -271,6 +290,7 @@
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
             $.extend(o, {
+                everyNminuteOpts     : $.extend({}, defaults.everyNminuteOpts, eo, options.everyNminuteOpts),
                 minuteOpts     : $.extend({}, defaults.minuteOpts, eo, options.minuteOpts),
                 domOpts        : $.extend({}, defaults.domOpts, eo, options.domOpts),
                 monthOpts      : $.extend({}, defaults.monthOpts, eo, options.monthOpts),
@@ -291,9 +311,10 @@
                 }
             }
             block["period"] = $("<span class='cron-period'>"
-                    + "Every <span id='everyNmins'></span><select name='cron-period'>" + custom_periods 
+                    + "Every <select name='cron-period'>" + custom_periods 
                     + str_opt_period + "</select> </span>")
                 .appendTo(this)                               
+                .data("root", this)
                 .find("select")
                     .bind("change.cron", event_handlers.periodChanged)
                     .data("root", this)
@@ -327,6 +348,16 @@
                 .data("root", this)
                 .find("select")
                     .gentleSelect(o.minuteOpts)
+                    .data("root", this)
+                    .end();
+
+	    block["everyNmins"] = $("<span class='cron-block cron-block-everyNmins'>"
+                    + " Every <select name='cronNmins'>" + str_opt_enm
+                    + "</select> minutes </span>")
+                .appendTo(this)
+                .data("root", this)
+                .find("select")
+                    .gentleSelect(o.everyNminuteOpts)
                     .data("root", this)
                     .end();
 
@@ -376,27 +407,12 @@
             if (!cron_str) { return getCurrentValue(this); }
 
             var t = getCronType(cron_str);
-            if (!defined(t)) { return false; }
+            if (!defined(t)) {alert("undefined t"); return false; }
 
             var block = this.data("block");
             var d;
 	    var v;
-	    if(cron_str.search('\/') >0) {
-	      d = cron_str.split(" ");
-	      //alert(d[0]);
-	      v = {
-		  "mins"  : d[0].split("/")[0], //*
-		  "everyNmins" : d[0].split("/")[1], //\5
-		  "hour"  : d[1],
-		  "dom"   : d[2],
-		  "month" : d[3],
-		  "dow"   : d[4]
-	      }; 
-	      
-	    }
-            else {
-	      d = cron_str.split(" ");
-	      //alert(d[0]);
+	    d = cron_str.split(" ");
 	      v = {
 		  "mins"  : d[0],
 		  "hour"  : d[1],
@@ -405,14 +421,11 @@
 		  "dow"   : d[4]
 	      }; 
 	      
-	    }
-
             // update appropriate select boxes
             var targets = toDisplay[t];
 	    
             for (var i = 0; i < targets.length; i++) {
                 var tgt = targets[i];
-		alert(tgt);
                 if (tgt == "time") {
                     block[tgt]
                         .find("select.crontimehour")
@@ -423,10 +436,9 @@
                         .end();
                 } 
                 else if(tgt == "everyNmins") {
-		    $("#everyNmins").html(v[tgt]);
-		    block['mins']
+		    block[tgt]
                         .find("select.crontimemin")
-                            .val(v["mins"]+'/'+v["everyNmins"]).gentleSelect("update")
+                            .val(v["mins"]).gentleSelect("update")
 			.end();
 		}
                 else {;
