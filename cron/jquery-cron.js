@@ -115,7 +115,7 @@
     // options for days of month
     var str_opt_dom = "";
     for (var i = 1; i < 32; i++) {
-        if (i == 1 || i == 21) { var suffix = "st"; } 
+        if (i == 1 || i == 21 || i == 31) { var suffix = "st"; } 
         else if (i == 2 || i == 22) { var suffix = "nd"; } 
         else if (i == 3 || i == 23) { var suffix = "rd"; } 
         else { var suffix = "th"; }
