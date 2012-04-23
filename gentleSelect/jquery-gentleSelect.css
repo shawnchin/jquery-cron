@@ -41,7 +41,7 @@
     margin: 0;
     padding: 3px 20px 3px 25px;
     
-    cursor: default;
+    cursor: pointer;
 }
 .gentleselect-dialog > ul > li.selected {
     font-weight: bold;
