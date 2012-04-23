@@ -31,12 +31,34 @@ on DOM ready:
     });
     </script>
 
+To allow multiple cron values (i.e. * * * * 2,4 ):
+
+    $(document).ready(function() {
+        $('#selector').cron({
+        	multiFrequency: true
+        });
+    });
+    </script>
+    
+That will default to 1-4 frequencies. You may also supply your own:
+
+    $(document).ready(function() {
+        $('#selector').cron({
+        	multiFrequency: true,
+			frequencyOpts : {
+				6:"six",
+				9:"nine",
+			}
+        });
+    });
+    </script>
+    
 For more options, see the [jquery-cron] website.
 
 
 ## Others
 
-Copyright (c) 2010, Shawn Chin.
+Copyright (c) 2010, Shawn Chin, Jason Weir.
 
 This project is licensed under the [MIT license].
 
