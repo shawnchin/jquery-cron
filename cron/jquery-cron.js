@@ -47,6 +47,7 @@
             itemWidth : 30,
             columns   : 4,
             rows      : undefined,
+            disallowEmpty : true,
             title     : "Minutes Past the Hour"
         },
         timeHourOpts : {
@@ -54,6 +55,7 @@
             itemWidth : 20,
             columns   : 2,
             rows      : undefined,
+            disallowEmpty : true,
             title     : "Time: Hour"
         },
         domOpts : {
@@ -61,6 +63,7 @@
             itemWidth : 30,
             columns   : undefined,
             rows      : 10,
+            disallowEmpty : true,
             title     : "Day of Month"
         },
         monthOpts : {
@@ -68,6 +71,7 @@
             itemWidth : 100,
             columns   : 2,
             rows      : undefined,
+            disallowEmpty : true,
             title     : undefined
         },
         dowOpts : {
@@ -75,6 +79,7 @@
             itemWidth : undefined,
             columns   : undefined,
             rows      : undefined,
+            disallowEmpty : true,
             title     : undefined
         },
         timeMinuteOpts : {
@@ -82,6 +87,7 @@
             itemWidth : 20,
             columns   : 4,
             rows      : undefined,
+            disallowEmpty : true,
             title     : "Time: Minute"
         },
         effectOpts : {
