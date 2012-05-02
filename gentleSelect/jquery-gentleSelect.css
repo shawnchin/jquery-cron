@@ -42,19 +42,35 @@
 .gentleselect-dialog > ul > li {
     margin: 0;
     padding: 3px 20px 3px 25px;
-    
     cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .gentleselect-dialog > ul > li.selected {
     font-weight: bold;
     color: #369;
     background-color: #eee;
 }
+
 .gentleselect-dialog > ul > li.gentleselect-dummy:hover { background-color: #fff; }
 .gentleselect-dialog > ul > li:hover {
     background-color: #69c;
     color: #fff;
 }
+
+/* override CSS for lone selected item when disallowEmpty=true */
+.gentleselect-dialog > ul > li.sole-selected {
+    cursor: default;
+}
+.gentleselect-dialog > ul > li.sole-selected:hover {
+    color: #369;
+    background-color: #eee;
+}
+
 
 .gentleselect-dialog > .gentleselect-title {
     display: block;
