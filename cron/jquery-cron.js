@@ -395,8 +395,11 @@
             // when no args, act as getter
             if (!cron_str) { return getCurrentValue(this); }
 
-            var t = getCronType(cron_str);
-            if (!defined(t)) { return false; }
+            try {
+                var t = getCronType(cron_str);
+            } catch (err) {
+                return false; 
+            }
 
             var block = this.data("block");
             var d = cron_str.split(" ");

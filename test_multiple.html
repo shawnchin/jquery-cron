@@ -25,6 +25,10 @@
     .example-text { font-family: monospace; }
     #content { margin: 0 auto;  padding: 20px 20px 40px 20px; width: 760px; background-color: #fff; border: 1px solid #777; border-width: 0 1px 0px 1px; }
     #footer { margin: 0 auto; padding: 20px; padding-top: 2px; width: 760px; font-size: 0.8em; text-align: center; color: #888; }
+    
+    .test-data li.pass { color: green; }
+    .test-data li.fail { color: red; }
+    
     </style>
     
 </head>
@@ -113,7 +117,68 @@
         });
     });
     </script>
+    
+    <h2>Parsing input values</h2>
+    <p>
+      Enter cron values and see if they can be parsed. Note that
+      only "minutes past the hour", "day of week", "month", and 
+      "day of month" are configured to allow multiple values. 
+    </p>
+    
+    <div class='example'>
+    <div>
+        Input: <input type="text" id="cron-in" value="* * * * *" /> 
+        <button id='btn-parse'>parse</button>
+        <span id='parse-invalid' style='color:red;display:none'>invalid pattern</span>
+    </div><br />
+    <div id='test_input'></div>
+    <p>Output: <span class='example-text' id='test_input-val'></span></p>
+    </div>
 
+    These should pass:
+    <ul class="test-data" id='test-data'>
+        <li>* * * * *</li>
+        <li>55 * * * *</li>
+        <li>1,3,45 * * * *</li>
+        <li>42 3 * * *</li>
+        <li>42 3 * * 6</li>
+        <li>42 3 * * 1,6</li>
+        <li>32 14 13 * *</li>
+        <li>32 14 1,13 * *</li>
+        <li>32 14 13 1 *</li>
+        <li>32 14 1,13 1 *</li>
+    </ul>
+    
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var x = $('#test_input').cron({
+            initial: "* * * * *",
+            allowMultiple_minute : true,
+            allowMultiple_dom : true,
+            allowMultiple_dow : true,
+            allowMultiple_month : true,
+            onChange: function() {
+                $('#test_input-val').text($(this).cron("value"));
+            }
+        });
+        $("#btn-parse").click(function() {
+            var valid = x.cron("value", $("#cron-in").val());
+            $("#parse-invalid").toggle((valid === false));
+        });
+        
+        $("#test-data").children("li").each(function() {
+            var $this = $(this)
+            var valid = x.cron("value", $this.text());
+            if (valid === false) {
+                $this.addClass("fail").append("  (fail)");
+            } else {
+                $this.addClass("pass").append("  (pass)");
+            }
+        });
+        
+        x.cron("value", "* * * * *");
+    });
+    </script>
 </div>
 <div id='footer'>
 
