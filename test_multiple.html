@@ -135,7 +135,7 @@
     <p>Output: <span class='example-text' id='test_input-val'></span></p>
     </div>
 
-    These should pass:
+    These should be valid:
     <ul class="test-data" id='test-data'>
         <li>* * * * *</li>
         <li>55 * * * *</li>
@@ -147,6 +147,19 @@
         <li>32 14 1,13 * *</li>
         <li>32 14 13 1 *</li>
         <li>32 14 1,13 1 *</li>
+    </ul><br />
+    
+    These should be invalid:
+    <ul class="test-data" id='test-data' data-assert-invalid='true'>
+        <li>* 3,6 * * *</li>
+        <li>1,55 * * * *</li>
+        <li>3 3,6 * * *</li>
+        <li>1,55 2 * * *</li>
+        <li>55 55 * * *</li>
+        <li>* 5 * * *</li>
+        <li>* * 5 * *</li>
+        <li>* * * 5 *</li>
+        <li>* * * * 5</li>
     </ul>
     
     <script type="text/javascript">
@@ -166,17 +179,19 @@
             $("#parse-invalid").toggle((valid === false));
         });
         
-        $("#test-data").children("li").each(function() {
+        $(".test-data").children("li").each(function() {
             var $this = $(this)
             var valid = x.cron("value", $this.text());
             if (valid === false) {
-                $this.addClass("fail").append("  (fail)");
+                $this.append("  (invalid pattern)")
+                .addClass(($this.parent().data("assert-invalid")) ? "pass" : "fail");
             } else {
-                $this.addClass("pass").append("  (pass)");
+                $this.append("  (valid pattern)")
+                .addClass(($this.parent().data("assert-invalid")) ? "fail" : "pass");
             }
         });
         
-        x.cron("value", "* * * * *");
+        x.cron("value", "* * * * *"); // reset to a sensible value
     });
     </script>
 </div>
