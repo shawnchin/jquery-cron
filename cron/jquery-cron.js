@@ -92,6 +92,13 @@
             hideOnMouseOut : true
         },
         url_set : undefined,
+        allowMultiple_all : false,
+        allowMultiple_dom : false,
+        allowMultiple_month : false,
+        allowMultiple_dow : false,
+        allowMultiple_minute : false,
+        allowMultiple_timeHour : false,
+        allowMultiple_timeMinute : false,
         customValues : undefined,
         onChange: undefined // callback function each time value changes
     };
@@ -175,6 +182,8 @@
         return (!defined(obj) || typeof obj == "object")
     }
     
+    // TODO: accept comma-separated values for fields that have the
+    //       associated acceptMultiple_? set to true.
     function getCronType(cron_str) {
         // check format of initial cron value
         var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
@@ -277,13 +286,13 @@
             if (hasError(this, o)) { return this; }
 
             // ---- define select boxes in the right order -----
-
             var block = [], custom_periods = "", cv = o.customValues;
             if (defined(cv)) { // prepend custom values if specified
                 for (var key in cv) {
                     custom_periods += "<option value='" + cv[key] + "'>" + key + "</option>\n";
                 }
             }
+            
             block["period"] = $("<span class='cron-period'>"
                     + "Every <select name='cron-period'>" + custom_periods 
                     + str_opt_period + "</select> </span>")
@@ -294,8 +303,13 @@
                     .gentleSelect(eo)
                     .end();
             
+            // should we allow multiple entries by default?
+            var m_enable = " multiple='multiple'";
+            var m_def = (o.allowMultiple_all) ? m_enable : "";
+            
+            var mul = (o.allowMultiple_dom) ? m_enable : m_def;
             block["dom"] = $("<span class='cron-block cron-block-dom'>"
-                    + " on the <select name='cron-dom'>" + str_opt_dom 
+                    + " on the <select name='cron-dom'" + mul + ">" + str_opt_dom 
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
@@ -304,8 +318,9 @@
                     .data("root", this)
                     .end();
 
+            mul = (o.allowMultiple_month) ? m_enable : m_def;
             block["month"] = $("<span class='cron-block cron-block-month'>"
-                    + " of <select name='cron-month'>" + str_opt_month 
+                    + " of <select name='cron-month'" + mul + ">" + str_opt_month 
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
@@ -314,8 +329,9 @@
                     .data("root", this)
                     .end();
 
+            mul = (o.allowMultiple_minute) ? m_enable : m_def;
             block["mins"] = $("<span class='cron-block cron-block-mins'>"
-                    + " at <select name='cron-mins'>" + str_opt_mih 
+                    + " at <select name='cron-mins'" + mul + ">" + str_opt_mih 
                     + "</select> minutes past the hour </span>")
                 .appendTo(this)
                 .data("root", this)
@@ -324,8 +340,9 @@
                     .data("root", this)
                     .end();
 
+            mul = (o.allowMultiple_dow) ? m_enable : m_def;
             block["dow"] = $("<span class='cron-block cron-block-dow'>"
-                    + " on <select name='cron-dow'>" + str_opt_dow
+                    + " on <select name='cron-dow'" + mul + ">" + str_opt_dow
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
@@ -334,9 +351,11 @@
                     .data("root", this)
                     .end();
 
+            mul = (o.allowMultiple_timeHour) ? m_enable : m_def;
+            var mul_m = (o.allowMultiple_timeMinute) ? m_enable : m_def;
             block["time"] = $("<span class='cron-block cron-block-time'>"
-                    + " at <select name='cron-time-hour' class='cron-time-hour'>" + str_opt_hid
-                    + "</select>:<select name='cron-time-min' class='cron-time-min'>" + str_opt_mih
+                    + " at <select name='cron-time-hour' class='cron-time-hour'" + mul + ">" + str_opt_hid
+                    + "</select>:<select name='cron-time-min' class='cron-time-min'" + mul_m + ">" + str_opt_mih
                     + " </span>")
                 .appendTo(this)
                 .data("root", this)
