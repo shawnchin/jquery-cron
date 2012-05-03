@@ -170,12 +170,12 @@
     };
     
     var combinations = {
-        "minute" : /^(\*\s){4}\*$/,                    // "* * * * *"
-        "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,           // "? * * * *"
-        "day"    : /^(\d{1,2}\s){2}(\*\s){2}\*$/,      // "? ? * * *"
-        "week"   : /^(\d{1,2}\s){2}(\*\s){2}\d{1,2}$/, // "? ? * * ?"
-        "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
-        "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
+        "minute" : /^(\*\s){4}\*$/,                   // "* * * * *"
+        "hour"   : /^[\d,]+\s(\*\s){3}\*$/,           // "? * * * *"
+        "day"    : /^([\d,]+\s){2}(\*\s){2}\*$/,      // "? ? * * *"
+        "week"   : /^([\d,]+\s){2}(\*\s){2}[\d,]+$/,  // "? ? * * ?"
+        "month"  : /^([\d,]+\s){3}\*\s\*$/,           // "? ? ? * *"
+        "year"   : /^([\d,]+\s){4}\*$/                // "? ? ? ? *"
     };
     
     // ------------------ internal functions ---------------
@@ -188,32 +188,66 @@
         return (!defined(obj) || typeof obj == "object")
     }
     
-    // TODO: accept comma-separated values for fields that have the
-    //       associated acceptMultiple_? set to true.
-    function getCronType(cron_str) {
+    function getCronType(cron_str, o) {
         // check format of initial cron value
-        var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
+        var valid_cron = /^(([\d,]+|\*) +){4}([\d,]+|\*)$/;
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
         }
-        // check actual cron values
         var d = cron_str.split(" ");
+        if (d.length != 5) {
+            $.error("cron: invalid initial value");
+            return undefined;
+        }
+        
+        // acceptable value range
         //            mm, hh, DD, MM, DOW
         var minval = [ 0,  0,  1,  1,  0];
         var maxval = [59, 23, 31, 12,  6];
+        
+        // which fields support multiple values?
+        var mulval = [
+            o.allowMultiple_all || o.allowMultiple_timeMinute || o.allowMultiple_minute,
+            o.allowMultiple_all || o.allowMultiple_timeHour,
+            o.allowMultiple_all || o.allowMultiple_dom,
+            o.allowMultiple_all || o.allowMultiple_month,
+            o.allowMultiple_all || o.allowMultiple_dow
+        ];
+        
+        // check validity of all values
         for (var i = 0; i < d.length; i++) {
             if (d[i] == "*") continue;
-            var v = parseInt(d[i]);
-            if (defined(v) && v <= maxval[i] && v >= minval[i]) continue;
-
-            $.error("cron: invalid value found (col "+(i+1)+") in " + o.initial);
-            return undefined;
+            
+            var v = d[i].split(",").map(function(x) { return parseInt(x, 10); });
+            if (!mulval[i] && v.length > 1) {  // multi-value support
+                $.error("cron: unexpected multi-value cron entry");
+                return undefined;
+            }
+            
+            // check that each value is within bounds
+            $.each(v, function(idx, val) {
+                if (!defined(val) || val < minval[i] || val > maxval[i]) {
+                    $.error("cron: invalid cron value (column "+i+")");
+                    return undefined;
+                }
+            });
         }
-
+        
         // determine combination
         for (var t in combinations) {
-            if (combinations[t].test(cron_str)) { return t; }
+            if (combinations[t].test(cron_str)) { 
+                if (d[0].indexOf(",") >= 0) { // multi-val minute
+                    // when t == "hour", minutes refer to minutes past the hour
+                    // else, minutes refer to timeMinute
+                    if ((t == "hour" && !o.allowMultiple_minute) 
+                        || (t != "hour" && !o.allowMultiple_timeMinute)) {
+                        $.error("cron: unexpected multi-value cron entry");
+                        return undefined;
+                    }
+                }
+                return t; 
+            }
         }
 
         // unknown combination
@@ -222,7 +256,10 @@
     }
 
     function hasError(c, o) {
-        if (!defined(getCronType(o.initial))) { return true; }
+        try {
+            console.log(o.initial);
+            console.log(getCronType(o.initial, o));
+        } catch (err) { return true; }
         if (!undefinedOrObject(o.customValues)) { return true; }
         return false;
     }
@@ -396,13 +433,17 @@
             if (!cron_str) { return getCurrentValue(this); }
 
             try {
-                var t = getCronType(cron_str);
+                var t = getCronType(cron_str, this.data("options"));
             } catch (err) {
                 return false; 
             }
 
             var block = this.data("block");
-            var d = cron_str.split(" ");
+            var d = cron_str.split(" ").map(function(x) {
+                var vals = x.split(",");
+                return (vals.length == 1) ? vals[0] : vals;
+            });
+            
             var v = {
                 "mins"  : d[0],
                 "hour"  : d[1],
@@ -410,9 +451,10 @@
                 "month" : d[3],
                 "dow"   : d[4]
             };
-
+            
             // update appropriate select boxes
             var targets = toDisplay[t];
+            
             for (var i = 0; i < targets.length; i++) {
                 var tgt = targets[i];
                 if (tgt == "time") {
@@ -423,7 +465,7 @@
                         .find("select.cron-time-min")
                             .val(v["mins"]).gentleSelect("update")
                         .end();
-                } else {;
+                } else {
                     block[tgt].find("select").val(v[tgt]).gentleSelect("update");
                 }
             }

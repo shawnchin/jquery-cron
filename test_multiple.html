@@ -40,9 +40,14 @@
     <ul>
       <li>UI to indicate multiple selection is allowed/enabled</li>
       <li><strike>Ensure at lease one is selected at all times</strike></li>
-      <li>
+      <li><strike>
         <code>getCronType()</code> should recognise comma-separated
         entries for fields that have allowMultiple enabled.
+        </strike>
+      </li>
+      <li>
+          Better mechanism to handle invalid input. <code>$.error()</code> 
+          is too heavy-handed and does allow users an easy way to recover.
       </li>
     </ul>
     
@@ -152,7 +157,6 @@
     These should be invalid:
     <ul class="test-data" id='test-data' data-assert-invalid='true'>
         <li>* 3,6 * * *</li>
-        <li>1,55 * * * *</li>
         <li>3 3,6 * * *</li>
         <li>1,55 2 * * *</li>
         <li>55 55 * * *</li>
