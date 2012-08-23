@@ -91,9 +91,11 @@
             closeEffect    : "slide",
             hideOnMouseOut : true
         },
+        periodsShown: ['minute', 'hour', 'day', 'week', 'month', 'year'],
         url_set : undefined,
         customValues : undefined,
-        onChange: undefined // callback function each time value changes
+        onChange: undefined, // callback function each time value changes
+        showTime: true
     };
     
     // -------  build some static data -------
@@ -139,23 +141,6 @@
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n"; 
     }
 
-    // options for period
-    var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
-    for (var i = 0; i < periods.length; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n"; 
-    }
-    
-    // display matrix
-    var toDisplay = {
-        "minute" : [],
-        "hour"   : ["mins"],
-        "day"    : ["time"],
-        "week"   : ["dow", "time"],
-        "month"  : ["dom", "time"],
-        "year"   : ["dom", "month", "time"]
-    };
-    
     var combinations = {
         "minute" : /^(\*\s){4}\*$/,                    // "* * * * *"
         "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,           // "? * * * *"
@@ -164,7 +149,7 @@
         "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
         "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
     };
-    
+
     // ------------------ internal functions ---------------
     function defined(obj) {
         if (typeof obj == "undefined") { return false; }
@@ -174,7 +159,7 @@
     function undefinedOrObject(obj) {
         return (!defined(obj) || typeof obj == "object")
     }
-    
+
     function getCronType(cron_str) {
         // check format of initial cron value
         var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
@@ -272,7 +257,24 @@
                 timeHourOpts   : $.extend({}, defaults.timeHourOpts, eo, options.timeHourOpts), 
                 timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts)
             });
-            
+
+            // options for period
+            var str_opt_period = "";
+            var periods = o.periodsShown
+            for (var i = 0; i < periods.length; i++) {
+                str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n"; 
+            }
+
+            // display matrix
+            var toDisplay = {
+                "minute" : [],
+                "hour"   : ["mins"],
+                "day"    : o.showTime ? ["time"] : [],
+                "week"   : o.showTime ? ["dow", "time"] : ["dow"],
+                "month"  : o.showTime ? ["dom", "time"] : ["dom"],
+                "year"   : o.showTime ? ["dom", "month", "time"] : ["dom", "month"]
+            };
+
             // error checking
             if (hasError(this, o)) { return this; }
 
@@ -360,7 +362,7 @@
                     .end();
 
             this.find("select").bind("change.cron-callback", event_handlers.somethingChanged);
-            this.data("options", o).data("block", block); // store options and block pointer
+            this.data("options", o).data("block", block).data("toDisplay", toDisplay); // store options and block pointer
             this.data("current_value", o.initial); // remember base value to detect changes
             
             return methods["value"].call(this, o.initial); // set initial value
@@ -384,7 +386,7 @@
             };
 
             // update appropriate select boxes
-            var targets = toDisplay[t];
+            var targets = this.data("toDisplay")[t];
             for (var i = 0; i < targets.length; i++) {
                 var tgt = targets[i];
                 if (tgt == "time") {
@@ -415,6 +417,7 @@
         periodChanged : function() {
             var root = $(this).data("root");
             var block = root.data("block"),
+                toDisplay = root.data("toDisplay"),
                 opt = root.data("options");
             var period = $(this).val();
             root.find("span.cron-block").hide(); // first, hide all blocks
