@@ -91,11 +91,11 @@
             closeEffect    : "slide",
             hideOnMouseOut : true
         },
-        periodsShown: ['minute', 'hour', 'day', 'week', 'month', 'year'],
+        displayPeriods: ['minute', 'hour', 'day', 'week', 'month', 'year'],
         url_set : undefined,
         customValues : undefined,
         onChange: undefined, // callback function each time value changes
-        showTime: true
+        displayTime: true
     };
     
     // -------  build some static data -------
@@ -260,7 +260,7 @@
 
             // options for period
             var str_opt_period = "";
-            var periods = o.periodsShown
+            var periods = o.displayPeriods
             for (var i = 0; i < periods.length; i++) {
                 str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n"; 
             }
@@ -269,10 +269,10 @@
             var toDisplay = {
                 "minute" : [],
                 "hour"   : ["mins"],
-                "day"    : o.showTime ? ["time"] : [],
-                "week"   : o.showTime ? ["dow", "time"] : ["dow"],
-                "month"  : o.showTime ? ["dom", "time"] : ["dom"],
-                "year"   : o.showTime ? ["dom", "month", "time"] : ["dom", "month"]
+                "day"    : o.displayTime ? ["time"] : [],
+                "week"   : o.displayTime ? ["dow", "time"] : ["dow"],
+                "month"  : o.displayTime ? ["dom", "time"] : ["dom"],
+                "year"   : o.displayTime ? ["dom", "month", "time"] : ["dom", "month"]
             };
 
             // error checking

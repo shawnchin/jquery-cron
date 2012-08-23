@@ -51,6 +51,16 @@
                 "2 Hours on Weekends" : "0 */2 * * 5,6"
             }
         });
+        $('#example4').cron({
+            displayPeriods: ['day', 'week', 'month'],
+        });
+        $('#example5').cron({
+            displayPeriods: ['day', 'week', 'month'],
+            displayTime: false,
+            onChange: function() {
+                $('#example5-val').text($(this).cron("value"));
+            }
+        });
     });
     </script>
 </head>
@@ -308,6 +318,42 @@ $('#selector').cron({
         </li>
     </ul>
     </p>
+
+    <h3 id='option-periods'>Removing default periods</h3>
+    <p>
+    If you do not need certain periods to be displayed in the drop down, you can specify which periods to
+    display with the <tt>displayPeriods</tt> option.
+    </p>
+    <p>
+    For example, you can only show day, week, and month periods with the following:
+    <pre>
+$('#selector').cron({
+    displayPeriods: ['day', 'week', 'month']
+});
+    </pre>
+    </p>
+    <div class='example'>
+        <div id='example4'></div>
+    </div>
+
+    <h3 id='option-showTime'>Disabling time selection</h3>
+    <p>
+    Time selection can also be disabled with the <tt>displayTime</tt> option.  This will only have an effect on the
+    periods that have time selection.
+    </p>
+    <p>
+    For example, the following disables time selection.
+    <pre>
+$('#selector').cron({
+    displayPeriods: ['day', 'week', 'month'],
+    displayTime: false
+});
+    </pre>
+    <div class='example'>
+        <div id='example5'></div>
+        <p>Generated cron entry: <span class='example-text' id='example5-val'></span></p>
+    </div>
+
     <h2>Methods</h2>
     <h3 id='method-value'>value</h3>
     <p>
