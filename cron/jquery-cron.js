@@ -41,7 +41,8 @@
 (function($) {
     
     var defaults = {
-        initial : "* * * * *",
+        enableSeconds: false,
+        initial: "* * * * *",
         minuteOpts : {
             minWidth  : 100, // only applies if columns and itemWidth not set
             itemWidth : 30,
@@ -115,7 +116,7 @@
     // options for days of month
     var str_opt_dom = "";
     for (var i = 1; i < 32; i++) {
-        if (i == 1 || i == 21 || i == 31) { var suffix = "st"; } 
+        if (i == 1 || i == 21) { var suffix = "st"; } 
         else if (i == 2 || i == 22) { var suffix = "nd"; } 
         else if (i == 3 || i == 23) { var suffix = "rd"; } 
         else { var suffix = "th"; }
@@ -165,6 +166,16 @@
         "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
     };
     
+    var combinationsSeconds = {
+        "second": /^(\*\s){5}\*$/,                    // "* * * * * *"
+        "minute": /^\d{1,2}\s(\*\s){4}\*$/,           // "? * * * * *"
+        "hour"  : /^(\d{1,2}\s){2}(\*\s){3}\*$/,      // "? ? * * * *"
+        "day"   : /^(\d{1,2}\s){3}(\*\s){2}\*$/,      // "? ? ? * * *"
+        "week"  : /^(\d{1,2}\s){3}(\*\s){2}\d{1,2}$/, // "? ? ? * * ?"
+        "month" : /^(\d{1,2}\s){4}\*\s\*$/,           // "? ? ? ? * *"
+        "year"  : /^(\d{1,2}\s){5}\*$/                // "? ? ? ? ? *"
+    };
+
     // ------------------ internal functions ---------------
     function defined(obj) {
         if (typeof obj == "undefined") { return false; }
@@ -175,9 +186,9 @@
         return (!defined(obj) || typeof obj == "object")
     }
     
-    function getCronType(cron_str) {
+    function getCronType(cron_str, enableSeconds) {
         // check format of initial cron value
-        var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
+        var valid_cron = enableSeconds ? /^((\d{1,2}|\*)\s)((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/ : /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/;
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
@@ -185,8 +196,8 @@
         // check actual cron values
         var d = cron_str.split(" ");
         //            mm, hh, DD, MM, DOW
-        var minval = [ 0,  0,  1,  1,  0];
-        var maxval = [59, 23, 31, 12,  6];
+        var minval = enableSeconds ? [0, 0, 0, 1, 1, 0] : [0, 0, 1, 1, 0];
+        var maxval = enableSeconds ? [59, 59, 23, 31, 12,  6] : [59, 23, 31, 12, 6];
         for (var i = 0; i < d.length; i++) {
             if (d[i] == "*") continue;
             var v = parseInt(d[i]);
@@ -197,8 +208,9 @@
         }
 
         // determine combination
-        for (var t in combinations) {
-            if (combinations[t].test(cron_str)) { return t; }
+        var validCombinations = enableSeconds ? combinationsSeconds : combinations;
+        for (var t in validCombinations) {
+            if (validCombinations[t].test(cron_str)) { return t; }
         }
 
         // unknown combination
@@ -207,41 +219,46 @@
     }
 
     function hasError(c, o) {
-        if (!defined(getCronType(o.initial))) { return true; }
+        if (!defined(getCronType(o.initial, o.enableSeconds))) { return true; }
         if (!undefinedOrObject(o.customValues)) { return true; }
         return false;
     }
 
     function getCurrentValue(c) {
         var b = c.data("block");
-        var min = hour = day = month = dow = "*";
+        var second = min = hour = day = month = dow = "*";
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
             case "minute":
                 break;
                 
             case "hour":
+                second = 0;
                 min = b["mins"].find("select").val();
                 break;
 
             case "day":
+                second = 0;
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 break;
 
             case "week":
+                second = 0;
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 dow  =  b["dow"].find("select").val();
                 break;
 
             case "month":
+                second = 0;
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
                 break;
 
             case "year":
+                second = 0;
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
@@ -252,6 +269,8 @@
                 // we assume this only happens when customValues is set
                 return selectedPeriod;
         }
+        if (c.data("options").enableSeconds)
+            return [second, min, hour, day, month, dow].join(" ");
         return [min, hour, day, month, dow].join(" ");
     }
 
@@ -264,7 +283,7 @@
             var options = opts ? opts : {}; /* default to empty obj */
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
-            $.extend(o, { 
+            $.extend(o, {
                 minuteOpts     : $.extend({}, defaults.minuteOpts, eo, options.minuteOpts), 
                 domOpts        : $.extend({}, defaults.domOpts, eo, options.domOpts), 
                 monthOpts      : $.extend({}, defaults.monthOpts, eo, options.monthOpts), 
@@ -272,7 +291,7 @@
                 timeHourOpts   : $.extend({}, defaults.timeHourOpts, eo, options.timeHourOpts), 
                 timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts)
             });
-            
+           
             // error checking
             if (hasError(this, o)) { return this; }
 
@@ -370,18 +389,31 @@
             // when no args, act as getter
             if (!cron_str) { return getCurrentValue(this); }
 
-            var t = getCronType(cron_str);
+            var opts = this.data("options");
+
+            var t = getCronType(cron_str, opts.enableSeconds);
             if (!defined(t)) { return false; }
 
             var block = this.data("block");
             var d = cron_str.split(" ");
-            var v = {
-                "mins"  : d[0],
-                "hour"  : d[1],
-                "dom"   : d[2],
-                "month" : d[3],
-                "dow"   : d[4]
-            };
+            var v = {};
+            if (opts.enableSeconds)
+                v = {
+                    "secs"  : d[0],
+                    "mins"  : d[1],
+                    "hour"  : d[2],
+                    "dom"   : d[3],
+                    "month" : d[4],
+                    "dow"   : d[5]
+                };
+            else
+                v = {
+                    "mins": d[0],
+                    "hour": d[1],
+                    "dom": d[2],
+                    "month": d[3],
+                    "dow": d[4]
+                };
 
             // update appropriate select boxes
             var targets = toDisplay[t];
