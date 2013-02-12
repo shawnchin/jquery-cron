@@ -160,7 +160,7 @@
     var combinations = {
         "minute" : /^(\*\s){4}\*$/,                    // "* * * * *"
         "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,           // "? * * * *"
-        "day"    : /^(\d{1,2}\s){2}(\*\s){2}\*$/,      // "? ? * * *"
+        "day"    : /^(\d{1,2}\s){2}(\*\s){2}(\*|\?)$/, // "? ? * * *"
         "week"   : /^(\d{1,2}\s){2}(\*\s){2}\d{1,2}$/, // "? ? * * ?"
         "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
         "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
@@ -170,7 +170,7 @@
         "second": /^(\*\s){5}\*$/,                    // "* * * * * *"
         "minute": /^\d{1,2}\s(\*\s){4}\*$/,           // "? * * * * *"
         "hour"  : /^(\d{1,2}\s){2}(\*\s){3}\*$/,      // "? ? * * * *"
-        "day"   : /^(\d{1,2}\s){3}(\*\s){2}\*$/,      // "? ? ? * * *"
+        "day"   : /^(\d{1,2}\s){3}(\*\s){2}(\*|\?)$/, // "? ? ? * * *"
         "week"  : /^(\d{1,2}\s){3}(\*\s){2}\d{1,2}$/, // "? ? ? * * ?"
         "month" : /^(\d{1,2}\s){4}\*\s\*$/,           // "? ? ? ? * *"
         "year"  : /^(\d{1,2}\s){5}\*$/                // "? ? ? ? ? *"
@@ -188,7 +188,7 @@
     
     function getCronType(cron_str, enableSeconds) {
         // check format of initial cron value
-        var valid_cron = enableSeconds ? /^((\d{1,2}|\*)\s)((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/ : /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/;
+        var valid_cron = enableSeconds ? /^((\d{1,2}|\*)\s){3}((\d{1,2}|\*|\?)\s)((\d{1,2}|\*)\s)((\d{1,2}|\*|\?))$/ : /^((\d{1,2}|\*)\s){2}((\d{1,2}|\*|\?)\s)((\d{1,2}|\*)\s)((\d{1,2}|\*|\?))$/;
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
@@ -199,7 +199,7 @@
         var minval = enableSeconds ? [0, 0, 0, 1, 1, 0] : [0, 0, 1, 1, 0];
         var maxval = enableSeconds ? [59, 59, 23, 31, 12,  6] : [59, 23, 31, 12, 6];
         for (var i = 0; i < d.length; i++) {
-            if (d[i] == "*") continue;
+            if (d[i] == "*" || d[i] == "?") continue;
             var v = parseInt(d[i]);
             if (defined(v) && v <= maxval[i] && v >= minval[i]) continue;
 
@@ -230,17 +230,20 @@
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
             case "minute":
+                dow = "?";
                 break;
                 
             case "hour":
                 second = 0;
                 min = b["mins"].find("select").val();
+                dow = "?";
                 break;
 
             case "day":
                 second = 0;
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
+                dow = "?";
                 break;
 
             case "week":
@@ -248,6 +251,7 @@
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 dow  =  b["dow"].find("select").val();
+                day = "?";
                 break;
 
             case "month":
@@ -255,6 +259,7 @@
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
+                dow = "?";
                 break;
 
             case "year":
@@ -263,6 +268,7 @@
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
                 month = b["month"].find("select").val();
+                dow = "?";
                 break;
 
             default:
