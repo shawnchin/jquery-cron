@@ -51,6 +51,16 @@
                 "2 Hours on Weekends" : "0 */2 * * 5,6"
             }
         });
+        $('#example4').cron({
+            enableSeconds: true,
+            initial: "0 3 * * * ?",
+            onChange: function() {
+                $('#example4-val').text($(this).cron("value"));
+            },
+            customValues: {
+                "20 Seconds" : "20 * * * * ?"
+            }
+        });
     });
     </script>
 </head>
@@ -73,6 +83,10 @@
     <div class='example'>
     <div id='example1'></div>
     <p>Generated cron entry: <span class='example-text' id='example1-val'></span></p>
+
+    <p>With seconds enabled</p>
+    <div id='example4'></div>
+    <p>Generated cron entry: <span class='example-text' id='example4-val'></span></p>
     </div>
 
     <p>
