@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>jquery-cron : a jQuery plugin</title>
     <link type="text/css" href="gentleSelect/jquery-gentleSelect.css" rel="stylesheet" />
     <link type="text/css" href="cron/jquery-cron.css" rel="stylesheet" />
@@ -60,7 +61,7 @@
 
     <h2 id='intro'>Introduction</h2>
     <p>
-    jquery-cron is a <a href='http://jquery.com'>jQuery</a> plugin for 
+    jquery-cron is a <a href='http://jquery.com'>jQuery</a> plugin for
     presenting a simplified interface for users to specify cron entries.
     </p>
 
@@ -80,10 +81,10 @@
     option can be used to provide a list of canned cron entries. This allow users to
     cater for common use cases as well as enable more complex cron entries.
     </p>
-    
+
     <p>
     There is much room for improvements and we welcome contributions
-    and bug fixes. Feel free to fork <a href='https://github.com/shawnchin/jquery-cron'>the project</a> 
+    and bug fixes. Feel free to fork <a href='https://github.com/shawnchin/jquery-cron'>the project</a>
     and send us pull requests!
     </p>
 
@@ -103,13 +104,13 @@
     <h2>Usage</h2>
 
     <p>
-    To use this plugin, one simply needs to load <a href='http://jquery.com'>jQuery</a>, 
-    <a href='http://shawnchin.github.com/jquery-gentleSelect'>jquery-gentleSelect</a> 
+    To use this plugin, one simply needs to load <a href='http://jquery.com'>jQuery</a>,
+    <a href='http://shawnchin.github.com/jquery-gentleSelect'>jquery-gentleSelect</a>
     and the JS/CSS scripts for jquery-cron, then attach it to an empty &lt;div&gt; on DOM ready:
     </p>
 
     <pre>
-&lt;script type="text/javascript" 
+&lt;script type="text/javascript"
         src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="gentleSelect/jquery-gentleSelect.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="cron/jquery-cron.js"&gt;&lt;/script&gt;
@@ -136,7 +137,7 @@
         </li>
 
         <li>
-        <strong>AJAX POST</strong> : 
+        <strong>AJAX POST</strong> :
         See the <a href="#option-urlset"><tt>url_set</tt></a> option.
         </li>
 
@@ -167,14 +168,14 @@
     </p>
 
     <p>
-    After the object has been set up, you can still update the value using 
+    After the object has been set up, you can still update the value using
     the <a href="#method-value"><tt>value</tt></a> method.
     </p>
 
     <h3 id='option-urlset'>url_set</h3>
     <p>
     You can asynchronously submit the current value to you backend script by specifying then
-    the URL using the <tt>url_set</tt> option. 
+    the URL using the <tt>url_set</tt> option.
     </p>
 
     <p>
@@ -184,14 +185,14 @@
 
     <p>
     jquery-cron will submit the values <tt>{"cron": ??}</tt> using a POST request via AJAX.
-    If a non-error HTTP response is received, the save is considered to be successfule and 
+    If a non-error HTTP response is received, the save is considered to be successfule and
     the "save" icon will be hidden until the next change is made.
     </p>
-    
-    
+
+
     <h3 id='option-onchange'>onChange</h3>
     <p>
-    You can set a callback function using the <tt>onChange</tt> option. The function will be called 
+    You can set a callback function using the <tt>onChange</tt> option. The function will be called
     each time the value changes.
     For instance, the <a href='#intro'>example in the introduction</a> is implemented as using:
     </p>
@@ -242,8 +243,8 @@ $('#example2').cron({
     <h3 id='option-each-element'>Customising individual select boxes</h3>
     <p>
         It is possible to customise each of the generated select boxes by sending additional
-        options to its instance of <tt>gentleSelect</tt>. 
-        All <a href='http://shawnchin.github.com/jquery-gentleSelect/#option-title'>attributes 
+        options to its instance of <tt>gentleSelect</tt>.
+        All <a href='http://shawnchin.github.com/jquery-gentleSelect/#option-title'>attributes
         support by jquery-gentleSelect</a> can be specified.
     </p>
 
