@@ -290,60 +290,69 @@
                     + str_opt_period + "</select> </span>")
                 .appendTo(this)
                 .find("select")
-                    .bind("change.cron", event_handlers.periodChanged)
-                    .data("root", this)
-                    .end();
+                .bind("change.cron", event_handlers.periodChanged)
+                .data("root", this);
 
             if (o.useGentleSelect)
-                block["period"].gentleSelect(eo);
+                block["period"] = block["period"].gentleSelect(eo);
+
+            block["period"] = block["period"].end();
 
             block["dom"] = $("<span class='cron-block cron-block-dom'>"
                     + " on the <select name='cron-dom'>" + str_opt_dom
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select")
-                    .data("root", this)
-                    .end();
+                .find("select");
 
             if (o.useGentleSelect)
-                block["dom"].gentleSelect(o.domOpts);
+                block["dom"] = block["dom"].gentleSelect(o.domOpts);
+
+            block["dom"]
+                .data("root", this)
+                .end();
 
             block["month"] = $("<span class='cron-block cron-block-month'>"
                     + " of <select name='cron-month'>" + str_opt_month
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select")
-                    .data("root", this)
-                    .end();
+                .find("select");
 
             if (o.useGentleSelect)
-                block["month"].gentleSelect(o.monthOpts);
+                block["month"] = block["month"].gentleSelect(o.monthOpts);
+
+            block["month"]
+                .data("root", this)
+                .end();
 
             block["mins"] = $("<span class='cron-block cron-block-mins'>"
                     + " at <select name='cron-mins'>" + str_opt_mih
                     + "</select> minutes past the hour </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select")
-                    .data("root", this)
-                    .end();
+                .find("select");
 
             if (o.useGentleSelect)
-                block["mins"].gentleSelect(o.minuteOpts);
+                block["mins"] = block["mins"].gentleSelect(o.minuteOpts);
+
+            block["mins"]
+                .data("root", this)
+                .end();
 
             block["dow"] = $("<span class='cron-block cron-block-dow'>"
                     + " on <select name='cron-dow'>" + str_opt_dow
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select")
-                    .data("root", this)
-                    .end();
+                .find("select");
 
             if (o.useGentleSelect)
-                block["dow"].gentleSelect(o.dowOpts);
+                block["dow"] = block["dow"].gentleSelect(o.dowOpts);
+
+            block["dow"]
+                .data("root", this)
+                .end();
 
             block["time"] = $("<span class='cron-block cron-block-time'>"
                     + " at <select name='cron-time-hour' class='cron-time-hour'>" + str_opt_hid
@@ -351,20 +360,22 @@
                     + " </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select.cron-time-hour")
-                    .data("root", this)
-                    .end()
-                .find("select.cron-time-min")
-                    .data("root", this)
-                    .end();
+                .find("select.cron-time-hour");
 
-            if (o.useGentleSelect) {
-                block["time"].find("select.cron-time-hour")
-                             .gentleSelect(o.timeHourOpts)
-                             .end()
-                             .find("select.cron-time-min")
-                             .gentleSelect(o.timeMinuteOpts);
-            }
+            if (o.useGentleSelect)
+                block["time"] = block["time"].gentleSelect(o.timeHourOpts);
+
+            block["time"] = block["time"]
+                            .data("root", this)
+                            .end()
+                            .find("select.cron-time-min");
+
+            if (o.useGentleSelect)
+                block["time"] = block["time"].gentleSelect(o.timeMinuteOpts);
+
+            block["time"]
+                .data("root", this)
+                .end();
 
             block["controls"] = $("<span class='cron-controls'>&laquo; save "
                     + "<span class='cron-button cron-button-save'></span>"
@@ -405,35 +416,41 @@
             for (var i = 0; i < targets.length; i++) {
                 var tgt = targets[i];
                 if (tgt == "time") {
-                    block[tgt]
+                    var btgt = block[tgt]
                         .find("select.cron-time-hour")
-                            .val(v["hour"])
-                            .end()
-                        .find("select.cron-time-min")
-                            .val(v["mins"])
-                        .end();
+                        .val(v["hour"]);
 
-                    if (defaults.useGentleSelect) {
-                        block[tgt].find("select.cron-time-hour")
-                                  .gentleSelect("update")
-                                  .end()
-                                  .find("select.cron-time-min")
-                                  .gentleSelect("update");
-                    }
-                } else {;
-                    block[tgt].find("select").val(v[tgt]);
                     if (defaults.useGentleSelect)
-                        block[tgt].find("select").gentleSelect("update");
+                        btgt = btgt.gentleSelect("update");
+
+                    btgt = btgt.val(v["hour"])
+                               .end()
+                               .find("select.cron-time-min")
+                               .val(v["mins"]);
+
+                    if (defaults.useGentleSelect)
+                        btgt = btgt.gentleSelect("update");
+
+                    btgt = btgt.val(v["mins"])
+                               .end();
+
+                    block[tgt] = btgt;
+                } else {;
+                    var btgt = block[tgt].find("select").val(v[tgt]);
+                    if (defaults.useGentleSelect)
+                        btgt = btgt.gentleSelect("update");
+                    block[tgt] = btgt;
                 }
             }
 
             // trigger change event
-            block["period"].find("select")
-                .val(t)
-                .trigger("change");
+            var bp = block["period"].find("select")
+                    .val(t);
 
             if (defaults.useGentleSelect)
-                block["period"].find("select").gentleSelect("update");
+                bp = bp.gentleSelect("update");
+
+            bp = bp.trigger("change");
 
             return this;
         }

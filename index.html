@@ -33,7 +33,8 @@
             initial: "42 3 * * 5",
             onChange: function() {
                 $('#example1-val').text($(this).cron("value"));
-            }
+            },
+            useGentleSelect: true
         });
         $('#example2').cron({
             initial: "42 3 * * 5",
