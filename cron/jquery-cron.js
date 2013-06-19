@@ -406,33 +406,32 @@
                 "dow"   : d[4]
             };
 
+            // is gentleSelect enabled
+            var useGentleSelect = this.data('options').useGentleSelect;
+
             // update appropriate select boxes
             var targets = toDisplay[t];
             for (var i = 0; i < targets.length; i++) {
                 var tgt = targets[i];
                 if (tgt == "time") {
-                    var btgt = block[tgt]
-                        .find("select.cron-time-hour")
-                        .val(v["hour"]);
+                    var btgt = block[tgt].find("select.cron-time-hour")
+                                         .val(v["hour"]);
 
-                    if (defaults.useGentleSelect)
+                    if (useGentleSelect)
                         btgt.gentleSelect("update");
 
                     btgt = btgt.end()
                                .find("select.cron-time-min")
                                .val(v["mins"]);
 
-                    if (defaults.useGentleSelect)
+                    if (useGentleSelect)
                         btgt.gentleSelect("update");
 
-                    btgt = btgt.end();
-
-                    block[tgt] = btgt;
+                    btgt.end();
                 } else {;
                     var btgt = block[tgt].find("select").val(v[tgt]);
-                    if (defaults.useGentleSelect)
-                        btgt = btgt.gentleSelect("update");
-                    block[tgt] = btgt;
+                    if (useGentleSelect)
+                        btgt.gentleSelect("update");
                 }
             }
 
@@ -440,8 +439,8 @@
             var bp = block["period"].find("select")
                     .val(t);
 
-            if (defaults.useGentleSelect)
-                bp = bp.gentleSelect("update");
+            if (useGentleSelect)
+                bp.gentleSelect("update");
 
             bp.trigger("change");
 
