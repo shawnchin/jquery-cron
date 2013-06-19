@@ -52,6 +52,13 @@
                 "2 Hours on Weekends" : "0 */2 * * 5,6"
             }
         });
+        $('#example4').cron({
+            initial: "42 3 * * 5",
+            onChange: function() {
+                $('#example4-val').text($(this).cron("value"));
+            },
+            useGentleSelect: true
+        });
     });
     </script>
 </head>
@@ -97,33 +104,38 @@
     <h2>TODO</h2>
     <ul>
         <li>Support multiple entries per field</li>
-        <li>remove dependency on <a href='http://shawnchin.github.com/jquery-gentleSelect'>jquery-gentleSelect</a>. It should be an option, not a requirement.</li>
         <li>implement option to add CSS class (simplify customisation)</li>
         <li>make the AJAX POST functionality more generic</li>
     </ul>
     <h2>Usage</h2>
 
     <p>
-    To use this plugin, one simply needs to load <a href='http://jquery.com'>jQuery</a>,
-    <a href='http://shawnchin.github.com/jquery-gentleSelect'>jquery-gentleSelect</a>
-    and the JS/CSS scripts for jquery-cron, then attach it to an empty &lt;div&gt; on DOM ready:
+    To use this plugin, one simply needs to load <a href='http://jquery.com'>jQuery</a>
+    and the JS/CSS scripts for jquery-cron:
     </p>
 
     <pre>
 &lt;script type="text/javascript"
         src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="gentleSelect/jquery-gentleSelect.js"&gt;&lt;/script&gt;
+
 &lt;script type="text/javascript" src="cron/jquery-cron.js"&gt;&lt;/script&gt;
 
-&lt;link type="text/css" href="gentleSelect/jquery-gentleSelect.css" rel="stylesheet" /&gt;
 &lt;link type="text/css" href="cron/jquery-cron.css" rel="stylesheet" /&gt;
-
+</pre>
+<p>If used with <a href="#option-useGentleSelect"><tt>useGentleSelect</tt></a> you'll also need:</p>
+<pre>
+&lt;script type="text/javascript" src="gentleSelect/jquery-gentleSelect.js"&gt;&lt;/script&gt;
+&lt;link type="text/css" href="gentleSelect/jquery-gentleSelect.css" rel="stylesheet" /&gt;
+</pre>
+<p>
+    then attach it to an empty &lt;div&gt; on DOM ready:
+</p>
+<pre>
 &lt;script type="text/javascript"&gt;
-    $(document).ready(function() {
-        $('#selector').cron(); // apply cron with default options
-    });
+$(document).ready(function() {
+    $('#selector').cron(); // apply cron with default options
+});
 &lt;/script&gt;
-</pre><pre>
 &lt;!--- somewhere within &lt;body&gt; --&gt;
 &lt;div id='selector'&gt;&lt;/div&gt;
 </pre>
@@ -205,7 +217,23 @@ $('#example1').cron({
     }
 });</pre>
 
+    <h3 id='option-useGentleSelect'>useGentleSelect</h3>
+    <p>Tells the plugin to use <a href='http://shawnchin.github.com/jquery-gentleSelect'>gentleSelect</a> to show dropdown options instead of the default select inputs.
+    </p>
 
+    <pre>
+$('#example1').cron({
+    initial: "42 3 * * 5",
+    onChange: function() {
+        $('#example1-val').text($(this).cron("value"));
+    },
+    useGentleSelect: true // default: false
+});</pre>
+
+    <div class='example'>
+        <div id='example4'></div>
+        <p>Generated cron entry: <span class='example-text' id='example4-val'></span></p>
+    </div>
 
     <h3 id='option-effectopts'>effectOpts</h3>
     <p>
