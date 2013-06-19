@@ -423,16 +423,14 @@
                     if (defaults.useGentleSelect)
                         btgt = btgt.gentleSelect("update");
 
-                    btgt = btgt.val(v["hour"])
-                               .end()
+                    btgt = btgt.end()
                                .find("select.cron-time-min")
                                .val(v["mins"]);
 
                     if (defaults.useGentleSelect)
                         btgt = btgt.gentleSelect("update");
 
-                    btgt = btgt.val(v["mins"])
-                               .end();
+                    btgt = btgt.end();
 
                     block[tgt] = btgt;
                 } else {;
@@ -450,7 +448,9 @@
             if (defaults.useGentleSelect)
                 bp = bp.gentleSelect("update");
 
-            bp = bp.trigger("change");
+            block["period"].trigger("change");
+
+            console.log(block["period"]);
 
             return this;
         }
