@@ -7,7 +7,6 @@
  *
  * Requires:
  * - jQuery
- * - jQuery gentleSelect plugin
  *
  * Usage:
  *  (JS)
