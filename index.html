@@ -35,12 +35,20 @@
                 $('#example1-val').text($(this).cron("value"));
             }
         });
+        $('#example1b').cron({
+            initial: "42 3 * * 5",
+            onChange: function() {
+                $('#example1b-val').text($(this).cron("value"));
+            },
+            useGentleSelect: true
+        });
         $('#example2').cron({
             initial: "42 3 * * 5",
             effectOpts: {
                 openEffect: "fade",
                 openSpeed: "slow"
-            }
+            },
+            useGentleSelect: true
         });
         $('#example3').cron({
             initial: "42 3 * * 5",
@@ -50,7 +58,8 @@
             customValues: {
                 "5 Minutes" : "*/5 * * * *",
                 "2 Hours on Weekends" : "0 */2 * * 5,6"
-            }
+            },
+            useGentleSelect: true
         });
         $('#example4').cron({
             initial: "42 3 * * 5",
@@ -81,6 +90,13 @@
     <div class='example'>
     <div id='example1'></div>
     <p>Generated cron entry: <span class='example-text' id='example1-val'></span></p>
+    </div>
+    
+    Or, with <a href='#option-useGentleSelect'>useGentleSelect</a> enabled:
+    
+    <div class='example'>
+    <div id='example1b'></div>
+    <p>Generated cron entry: <span class='example-text' id='example1b-val'></span></p>
     </div>
 
     <p>
@@ -358,7 +374,7 @@ var current_value = cron_field.cron("value")
 <div id='footer'>
 
 
-Copyright &copy; 2010 <a href='http://github.com/shawnchin'>Shawn Chin</a>
+Copyright &copy; 2010-2013 <a href='http://github.com/shawnchin'>Shawn Chin</a>
 (Licensed under the <a href='http://www.opensource.org/licenses/mit-license.php'>MIT License</a>)
 </div>
 <a href="http://github.com/shawnchin/jquery-cron"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub" /></a>
