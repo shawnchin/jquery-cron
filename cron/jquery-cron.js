@@ -93,7 +93,8 @@
         url_set : undefined,
         customValues : undefined,
         onChange: undefined, // callback function each time value changes
-        useGentleSelect: false
+        useGentleSelect: false,
+		allowIntervalExpression: true // allow additional interval configuration like: "*/5 * * * *"
     };
 
     // -------  build some static data -------
@@ -349,7 +350,7 @@
 
             block["period"] = $("<span class='cron-period'>"
                     + "Every " 
-					+ "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='3' value='1'/> "
+					+ (o.allowIntervalExpression ? "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='3' value='1'/> " : "")
 					+ "<select name='cron-period'>" + custom_periods
                     + str_opt_period + "</select> </span>")
                 .appendTo(this)
