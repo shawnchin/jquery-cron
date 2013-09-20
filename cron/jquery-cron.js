@@ -150,11 +150,11 @@
 	
     // display matrix
     var toDisplay = {
-        "minute" : [],
-        "hour"   : ["mins"],
-        "day"    : ["time"],
-        "week"   : ["dow", "time"],
-        "month"  : ["dom", "time"],
+        "minute" : ["interval"],
+        "hour"   : ["interval","mins"],
+        "day"    : ["interval","time"],
+        "week"   : ["interval","dow", "time"],
+        "month"  : ["interval","dom", "time"],
         "year"   : ["dom", "month", "time"]
     };
 
@@ -351,13 +351,14 @@
 
             block["period"] = $("<span class='cron-period'>"
                     + "Every " 
-					+ (o.allowIntervalExpression ? "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='3' value='1'/> " : "")
+					+ (o.allowIntervalExpression ? "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='1' value='1'/> " : "")
 					+ "<select name='cron-period'>" + custom_periods
                     + str_opt_period + "</select> </span>")
                 .appendTo(this)
                 .data("root", this);
 
-			block["period"].find("input.cron-period-repeat").bind("change.cron", event_handlers.periodChanged).data("root", this);
+			block["interval"] = block["period"].find("input.cron-period-repeat");
+			block["interval"].bind("change.cron", event_handlers.periodChanged).data("root", this);
             var select = block["period"].find("select");
             select.bind("change.cron", event_handlers.periodChanged)
                   .data("root", this);
@@ -456,14 +457,16 @@
             var targets = toDisplay[t];
 			var tgt, btgt;
             for (i = 0, len = targets.length; i < len; i++) {
-                tgt = targets[i];
+                tgt = targets[i];				
                 if (tgt == "time") {
                     btgt = block[tgt].find("select.cron-time-hour").val(v["hour"]);
                     if (useGentleSelect) { btgt.gentleSelect("update"); }
 
                     btgt = block[tgt].find("select.cron-time-min").val(v["mins"]);
                     if (useGentleSelect) { btgt.gentleSelect("update"); }
-                } else {
+                } else if (tgt == "interval") {
+					continue;
+				} else {
                     btgt = block[tgt].find("select").val(v[tgt]);
                     if (useGentleSelect) { btgt.gentleSelect("update"); }
                 }
@@ -496,6 +499,7 @@
 			}
 			// update display
             root.find("span.cron-block").hide(); // first, hide all blocks
+			block["interval"].hide();
 			var b;
             if (toDisplay.hasOwnProperty(period)) { // not custom value
                 b = toDisplay[period];
