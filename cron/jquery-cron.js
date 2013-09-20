@@ -145,8 +145,8 @@
     var periods = ["minute", "hour", "day", "week", "month", "year"];
     for (i = 0, len = periods.length; i < len; i++) {
         str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
-    }
-
+    }	
+	
     // display matrix
     var toDisplay = {
         "minute" : [],
@@ -165,6 +165,15 @@
         "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
         "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
     };
+	
+	var toPosition = {
+        "minute" : 0,
+        "hour"   : 1,
+        "day"    : 2,
+        "week"   : 5,
+        "month"  : 3,
+        "year"   : 0
+    };
 
     // ------------------ internal functions ---------------
     function defined(obj) {
@@ -176,13 +185,41 @@
         return (!defined(obj) || typeof obj == "object")
     }
 
+	function parseCronRepeatTime(cron_str) {
+		var item = {};
+		// remove repeated times of the cron
+		var d = cron_str.split(" ");
+		// find first occurence of repeat time
+		var arr;
+		for (i = 0, len = d.length; i < len; i++) {
+			arr = d[i].split('/');
+			// check presence of repeat time
+			if (arr.length > 1) {
+				// allow only one occurrence of repeat time
+				d[i] = arr[0];
+				// set repeat time only for the first occurrence
+				if (!item.repeatTime){
+					item.repeatTime = arr[1];
+					item.repeatTimePos = i;
+				}
+			}
+		}
+		item.cron_str = cron_str;
+		item.cleanedCron = d.join(' ');
+		return item;
+	}
+	
     function getCronType(cron_str) {
         // check format of initial cron value
         var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/;
-        if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
+        // remove repeated times of the cron for validation
+		var parsedCron = parseCronRepeatTime(cron_str);
+		cron_str = parsedCron.cleanedCron;
+		// test cron string
+		if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
-        }
+        }		
         // check actual cron values
         var d = cron_str.split(" ");
         //            mm, hh, DD, MM, DOW
@@ -199,10 +236,21 @@
         }
 
         // determine combination
-        for (var t in combinations) {
-            if (combinations[t].test(cron_str)) { return t; }
-        }
+		// 1. try to find repeatTimePosition
+		if (parsedCron.repeatTimePos) {
+			for (var t in combinations) {
+				if (parsedCron.repeatTimePos === toPosition[t]) { 
+					return t; 
+				}
+			}
+		}
 
+		// 2. try to find normally
+		for (var t in combinations) {
+			if (combinations[t].test(cron_str)) { 
+				return t; 
+			}
+		}
         // unknown combination
         $.error("cron: valid but unsupported cron format. sorry.");
         return undefined;
@@ -217,31 +265,41 @@
     function getCurrentValue(c) {
         var b = c.data("block");
 		var min, hour, day, month, dow;
-        min = hour = day = month = dow = "*";
+		min = hour = day = month = dow = "*";
+		// prepare period repeat time
+		var repeatTime = b["period"].find("input.cron-period-repeat").val();
+		if (!repeatTime) { repeatTime = 1; }
+		
+		// prepare period
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
             case "minute":
+				if (repeatTime > 1) { min += "/" + repeatTime; }
                 break;
 
             case "hour":
                 min = b["mins"].find("select").val();
+				if (repeatTime > 1) { hour += "/" + repeatTime; }
                 break;
 
             case "day":
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
+				if (repeatTime > 1) { day += "/" + repeatTime; }
                 break;
 
             case "week":
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 dow  =  b["dow"].find("select").val();
+				if (repeatTime > 1) { dow += "/" + repeatTime; }
                 break;
 
             case "month":
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
+				if (repeatTime > 1) { month += "/" + repeatTime; }
                 break;
 
             case "year":
@@ -249,6 +307,7 @@
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
                 month = b["month"].find("select").val();
+				
                 break;
 
             default:
@@ -289,11 +348,14 @@
             }
 
             block["period"] = $("<span class='cron-period'>"
-                    + "Every <select name='cron-period'>" + custom_periods
+                    + "Every " 
+					+ "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='3' value='1'/> "
+					+ "<select name='cron-period'>" + custom_periods
                     + str_opt_period + "</select> </span>")
                 .appendTo(this)
                 .data("root", this);
 
+			block["period"].find("input.cron-period-repeat").bind("change.cron", event_handlers.periodChanged).data("root", this);
             var select = block["period"].find("select");
             select.bind("change.cron", event_handlers.periodChanged)
                   .data("root", this);
@@ -357,6 +419,7 @@
                     .data("root", this)
                     .end();
 
+			this.find("input.cron-period-repeat").bind("change.cron-callback", event_handlers.somethingChanged);
             this.find("select").bind("change.cron-callback", event_handlers.somethingChanged);
             this.data("options", o).data("block", block); // store options and block pointer
             this.data("current_value", o.initial); // remember base value to detect changes
@@ -373,6 +436,9 @@
 
             var block = this.data("block");
             var d = cron_str.split(" ");
+			// find first occurence of repeat time
+			var repeatTimeParsedItem = parseCronRepeatTime(cron_str);			
+			// parse values
             var v = {
                 "mins"  : d[0],
                 "hour"  : d[1],
@@ -400,6 +466,11 @@
                     if (useGentleSelect) { btgt.gentleSelect("update"); }
                 }
             }
+			
+			// set repeat time (note: this is just an initial approximation!)
+			if (repeatTimeParsedItem.repeatTime) {
+				block["period"].find("input.cron-period-repeat").val(repeatTimeParsedItem.repeatTime);
+			}
 
             // trigger change event
             var bp = block["period"].find("select").val(t);
@@ -417,11 +488,15 @@
             var block = root.data("block"),
                 opt = root.data("options");
             var period = $(this).val();
-
+			// deal with change on period repeat field
+			if (this.className === "cron-period-repeat") {
+				period = block["period"].find("select").val();
+			}
+			// update display
             root.find("span.cron-block").hide(); // first, hide all blocks
 			var b;
             if (toDisplay.hasOwnProperty(period)) { // not custom value
-                b = toDisplay[$(this).val()];
+                b = toDisplay[period];
                 for (i = 0, len = b.length; i < len; i++) {
                     block[b[i]].show();
                 }
