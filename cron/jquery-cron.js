@@ -183,7 +183,7 @@
     }
 
     function undefinedOrObject(obj) {
-        return (!defined(obj) || typeof obj == "object")
+        return (!defined(obj) || typeof obj == "object");
     }
 
 	function parseCronRepeatTime(cron_str) {
@@ -237,9 +237,10 @@
         }
 
         // determine combination
+		var t;
 		// 1. try to find repeatTimePosition
 		if (parsedCron.repeatTimePos) {
-			for (var t in combinations) {
+			for (t in combinations) {
 				if (parsedCron.repeatTimePos === toPosition[t]) { 
 					return t; 
 				}
@@ -247,7 +248,7 @@
 		}
 
 		// 2. try to find normally
-		for (var t in combinations) {
+		for (t in combinations) {
 			if (combinations[t].test(cron_str)) { 
 				return t; 
 			}
