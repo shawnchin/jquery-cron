@@ -34,7 +34,7 @@
         openEffect      : "slide",
         closeEffect     : "slide",
         hideOnMouseOut  : true
-    }
+    };
 
     function defined(obj) {
         if (typeof obj == "undefined") { return false; }
@@ -86,15 +86,16 @@
     }
 
     function getSelectedAsText(elemList, opts) { 
+		var arr;
         // If no items selected, return prompt
         if (elemList.length < 1) { return opts.prompt; }
 
         // Truncate if exceed maxDisplay
         if (opts.maxDisplay != 0 && elemList.length > opts.maxDisplay) {
-            var arr = elemList.slice(0, opts.maxDisplay).map(function(){return $(this).text();});
+            arr = elemList.slice(0, opts.maxDisplay).map(function(){return $(this).text();});
             arr.push("...");
         } else {
-            var arr = elemList.map(function(){return $(this).text();});
+            arr = elemList.map(function(){return $(this).text();});
         }
         return arr.get().join(", ");
     }
@@ -103,12 +104,12 @@
         init : function(options) {
             var o = $.extend({}, defaults, options);
 
-            if (hasError(this, o)) { return this; }; // check for errors
+            if (hasError(this, o)) { return this; } // check for errors
             optionOverrides(this, o); // 
             this.hide(); // hide original select box
             
             // initialise <span> to replace select box
-            label_text = getSelectedAsText(this.find(":selected"), o);
+            var label_text = getSelectedAsText(this.find(":selected"), o);
             var label = $("<span class='gentleselect-label'>" + label_text + "</span>")
                 .insertBefore(this)
                 .bind("mouseenter.gentleselect", event_handlers.labelHoverIn)
@@ -145,17 +146,18 @@
                 ul.css("float", "left")
                     .find("li").width(o.itemWidth).css("float","left");
                     
+				var cols, rows;
                 var f = ul.find("li:first");
                 var actualWidth = o.itemWidth 
                     + parseInt(f.css("padding-left")) 
                     + parseInt(f.css("padding-right"));
                 var elemCount = ul.find("li").length;
                 if (defined(o.columns)) {
-                    var cols = parseInt(o.columns);
-                    var rows = Math.ceil(elemCount / cols);
+                    cols = parseInt(o.columns);
+                    rows = Math.ceil(elemCount / cols);
                 } else {
-                    var rows = parseInt(o.rows);
-                    var cols = Math.ceil(elemCount / rows);
+                    rows = parseInt(o.rows);
+                    cols = Math.ceil(elemCount / rows);
                 }
                 dialog.width(actualWidth * cols);
 
@@ -166,12 +168,12 @@
 
                 // reorder elements
                 var ptr = [];
-                var idx = 0;
+                var idx = 0, p;
                 ul.find("li").each(function() {
                     if (idx < rows) { 
                         ptr[idx] = $(this); 
                     } else {
-                        var p = idx % rows;
+                        p = idx % rows;
                         $(this).insertAfter(ptr[p]);
                         ptr[p] = $(this);
                     }
@@ -260,7 +262,7 @@
             if (clicked.is("li") && !clicked.hasClass("gentleselect-dummy")) {
                 var value = clicked.data("value");
                 var name = clicked.data("name");
-                var label = $this.data("label")
+                var label = $this.data("label");
 
                 if ($this.data("root").attr("multiple")) {
                     clicked.toggleClass("selected");
@@ -280,7 +282,7 @@
         },
 
         keyUp : function(e) {
-            if (e.keyCode == 27 ) { // ESC
+            if (e.keyCode === 27 ) { // ESC
                 $(".gentleselect-dialog").hide();
             }
         }
