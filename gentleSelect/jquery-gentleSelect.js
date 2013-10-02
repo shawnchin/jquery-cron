@@ -33,6 +33,7 @@
         closeSpeed      : 400,
         openEffect      : "slide",
         closeEffect     : "slide",
+        disallowEmpty   : false,
         hideOnMouseOut  : true
     };
 
@@ -99,14 +100,38 @@
         }
         return arr.get().join(", ");
     }
+    
+    function updateState(c, o) {
+        var c = $(c);
+        if (c.attr("multiple") && o.disallowEmpty) { 
+            var all_items = c.data("dialog").find("li"),
+                selected_items = all_items.filter(".selected");
+                    
+            // mark element if only one selected
+            all_items.removeClass("sole-selected");
+            if (selected_items.length == 1) {
+              selected_items.addClass("sole-selected");
+            }
+        }
+    }
 
     var methods = {
         init : function(options) {
-            var o = $.extend({}, defaults, options);
+            var o = $.extend({}, defaults, options),
+                select_items = this.find("option");
 
             if (hasError(this, o)) { return this; } // check for errors
             optionOverrides(this, o); // 
             this.hide(); // hide original select box
+            
+            if (this.attr("multiple") && o.disallowEmpty)
+            {
+                if (select_items.length == 0) {
+                    $.error("gentleSelect: disallowEmpty conflicts with empty <select>");
+                }
+                // default to first item if none selected
+                if (this[0].selectedIndex < 0) { this[0].selectedIndex = 0; }
+            }
             
             // initialise <span> to replace select box
             var label_text = getSelectedAsText(this.find(":selected"), o);
@@ -121,7 +146,7 @@
             
             // generate list of options
             var ul = $("<ul></ul>");
-            this.find("option").each(function() { 
+            select_items.each(function() { 
                 var li = $("<li>" + $(this).text() + "</li>")
                     .data("value", $(this).attr("value"))
                     .data("name", $(this).text())
@@ -190,6 +215,7 @@
             // ESC key should hide all dialog boxes
             $(document).bind("keyup.gentleselect", event_handlers.keyUp);
 
+            updateState(this, o);
             return this;
         },
 
@@ -210,7 +236,24 @@
             var label = getSelectedAsText(this.find(":selected"), opts);
             this.data("label").text(label);
             
+            updateState(this, opts);
             return this;
+		},
+        
+        // clear all selections
+        clear : function() {
+            // Check for disallowEmpty option
+            if (this.data("options").disallowEmpty) {
+              $.error("gentleSelect: cannot use 'clear' when disallowEmpty=true");
+              return this;
+            }
+
+            // Deselect all options.
+            // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-85676760
+            this[0].selectedIndex = -1;
+
+            // Update dialog
+            return methods["update"].call(this);
         }
     };
 
@@ -265,12 +308,19 @@
                 var label = $this.data("label");
 
                 if ($this.data("root").attr("multiple")) {
+                    if (opts.disallowEmpty 
+                          && clicked.hasClass("selected") 
+                          && (root.find(":selected").length == 1)) {
+                        // sole item clicked. For now, do nothing.
+                        return;
+                    }
                     clicked.toggleClass("selected");
                     var s = $this.find("li.selected");
                     label.text(getSelectedAsText(s, opts));
                     var v = s.map(function(){ return $(this).data("value"); });
                     // update actual selectbox and trigger change event
                     root.val(v.get()).trigger("change");
+                    updateState(root, opts);
                 } else {
                     $this.find("li.selected").removeClass("selected");
                     clicked.addClass("selected");
