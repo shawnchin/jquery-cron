@@ -171,12 +171,12 @@
     var indexToField = ["minute", "hour", "day", "month", "week"];
 
     var combinations = {
-        "minute": /^(\*\s){4}\*$/,            // "* * * * *"
-        "hour": /^.\s(\*\s){3}\*$/,         // "? * * * *"
-        "day": /^(.\s){2}(\*\s){2}\*$/,    // "? ? * * *"
-        "week": /^(.\s){2}(\*\s){2}.$/,     // "? ? * * ?"
-        "month": /^(.\s){3}\*\s\*$/, 	    // "? ? ? * *"
-        "year": /^(.\s){4}\*$/              // "? ? ? ? *"
+        "minute": /^(\*\s){4}\*$/,      // "* * * * *"
+        "hour": /^.\s(\*\s){3}\*$/,     // "? * * * *"
+        "day": /^(.\s){2}(\*\s){2}\*$/, // "? ? * * *"
+        "week": /^(.\s){2}(\*\s){2}.$/, // "? ? * * ?"
+        "month": /^(.\s){3}\*\s\*$/,    // "? ? ? * *"
+        "year": /^(.\s){4}\*$/          // "? ? ? ? *"
     };
 
     // ------------------ internal functions ---------------
@@ -300,11 +300,11 @@
                 return selectedPeriod;
         }
         // treat not selected values
-        if (!min) { min = "*" }
-        if (!hour) { hour = "*" }
-        if (!day) { day = "*" }
-        if (!month) { month = "*" }
-        if (!dow) { dow = "*" }
+        if (!min) { min = "*"; }
+        if (!hour) { hour = "*"; }
+        if (!day) { day = "*"; }
+        if (!month) { month = "*"; }
+        if (!dow) { dow = "*"; }
         // create cron string
         return [min, hour, day, month, dow].join(" ");
     }
@@ -334,19 +334,23 @@
 
             // ---- define select boxes in the right order -----
 
-            var block = [], custom_periods = "", cv = o.customValues;
+            // create main cron period
+            var htmlText, block = [], custom_periods = "", cv = o.customValues;
             if (cv) { // prepend custom values if specified
                 for (var key in cv) {
                     custom_periods += "<option value='" + cv[key] + "'>" + key + "</option>\n";
                 }
             }
 
-            block["period"] = $("<span class='cron-period'>Every "
-					+ (o.allowIntervalExpression ? "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='1' value='1'/> " : "")
-					+ "<select name='cron-period'>" + custom_periods + str_opt_period + "</select> </span>")
-                .appendTo(this)
-                .data("root", this);
+            htmlText = "<span class='cron-period'>Every ";
+            if (o.allowIntervalExpression) {
+                htmlText += "<input type='number' class='cron-period-repeat' min='1' max='10000' style='width:32px;' step='1' value='1'/> ";                
+            }
+            htmlText += "<select name='cron-period'>" + custom_periods + str_opt_period + "</select> </span>";
+            
+            block["period"] = $(htmlText).appendTo(this).data("root", this);
 
+            // configure interval field
             block["interval"] = block["period"].find("input.cron-period-repeat");
             block["interval"].bind("change.cron", event_handlers.periodChanged).data("root", this);
             var select = block["period"].find("select");
@@ -354,42 +358,48 @@
                   .data("root", this);
             if (o.useGentleSelect) { select.gentleSelect(eo); }
 
-            block["dom"] = $("<span class='cron-block cron-block-dom'> on the "
-                    + "<select name='cron-dom' multiple>" + str_opt_dom + "</select> </span>")
+            // create day of month
+            htmlText = "<span class='cron-block cron-block-dom'> on the <select name='cron-dom' multiple>" + str_opt_dom + "</select> </span>";
+            block["dom"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
 
             select = block["dom"].find("select").data("root", this);
             if (o.useGentleSelect) { select.gentleSelect(o.domOpts); }
 
-            block["month"] = $("<span class='cron-block cron-block-month'> of "
-                    + "<select name='cron-month' multiple>" + str_opt_month + "</select> </span>")
+            // create month
+            htmlText = "<span class='cron-block cron-block-month'> of <select name='cron-month' multiple>" + str_opt_month + "</select> </span>";
+            block["month"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
 
             select = block["month"].find("select").data("root", this);
             if (o.useGentleSelect) { select.gentleSelect(o.monthOpts); }
 
-            block["mins"] = $("<span class='cron-block cron-block-mins'> at "
-                    + "<select name='cron-mins' multiple>" + str_opt_mih + "</select> minutes past the hour </span>")
+            // create minutes
+            htmlText = "<span class='cron-block cron-block-mins'> at <select name='cron-mins' multiple>" + str_opt_mih + "</select> minutes past the hour </span>";
+            block["mins"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
 
             select = block["mins"].find("select").data("root", this);
             if (o.useGentleSelect) { select.gentleSelect(o.minuteOpts); }
 
-            block["dow"] = $("<span class='cron-block cron-block-dow'> on "
-                    + "<select name='cron-dow' multiple>" + str_opt_dow + "</select> </span>")
+            // create day of week
+            htmlText = "<span class='cron-block cron-block-dow'> on <select name='cron-dow' multiple>" + str_opt_dow + "</select> </span>";
+            block["dow"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
 
             select = block["dow"].find("select").data("root", this);
             if (o.useGentleSelect) { select.gentleSelect(o.dowOpts); }
 
-            block["time"] = $("<span class='cron-block cron-block-time'>"
-                    + " at <select name='cron-time-hour' class='cron-time-hour' multiple>" + str_opt_hid
-                    + "</select>:<select name='cron-time-min' class='cron-time-min' multiple>" + str_opt_mih
-                    + "</select> </span>")
+            // create hour and minutes
+            htmlText = "<span class='cron-block cron-block-time'> at ";
+            htmlText =+ "<select name='cron-time-hour' class='cron-time-hour' multiple>" + str_opt_hid;
+            htmlText =+ "</select>:<select name='cron-time-min' class='cron-time-min' multiple>" + str_opt_mih;
+            htmlText =+ "</select> </span>";
+            block["time"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
 
