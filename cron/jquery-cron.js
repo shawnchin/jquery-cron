@@ -37,8 +37,8 @@
  * - Every month  : ? ? ? * *
  * - Every year   : ? ? ? ? *
  */
-(function($) {
-
+(function ($) {
+    'use strict';
     var defaults = {
         initial : "* * * * *",
         minuteOpts : {
@@ -101,17 +101,17 @@
 
 	var i, j, len;
     // options for minutes in an hour
-    var str_opt_mih = "";	
+    var str_opt_mih = "";
     for (i = 0; i < 60; i++) {
-        j = (i < 10)? "0":"";
-        str_opt_mih += "<option value='"+i+"'>" + j +  i + "</option>\n";
+        j = (i < 10) ? "0" : "";
+        str_opt_mih += "<option value='" + i + "'>" + j +  i + "</option>\n";
     }
 
     // options for hours in a day
     var str_opt_hid = "";
     for (i = 0; i < 24; i++) {
-        j = (i < 10)? "0":"";
-        str_opt_hid += "<option value='"+i+"'>" + j + i + "</option>\n";
+        j = (i < 10) ? "0" : "";
+        str_opt_hid += "<option value='" + i + "'>" + j + i + "</option>\n";
     }
 
     // options for days of month
@@ -121,7 +121,7 @@
         else if (i === 2 || i === 22) { suffix = "nd"; }
         else if (i === 3 || i === 23) { suffix = "rd"; }
         else { suffix = "th"; }
-        str_opt_dom += "<option value='"+i+"'>" + i + suffix + "</option>\n";
+        str_opt_dom += "<option value='" + i + "'>" + i + suffix + "</option>\n";
     }
 
     // options for months
@@ -130,7 +130,7 @@
                   "May", "June", "July", "August",
                   "September", "October", "November", "December"];
     for (i = 0, len = months.length; i < len; i++) {
-        str_opt_month += "<option value='"+(i+1)+"'>" + months[i] + "</option>\n";
+        str_opt_month += "<option value='" + (i + 1) + "'>" + months[i] + "</option>\n";
     }
 
     // options for day of week
@@ -138,14 +138,14 @@
     var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
                 "Friday", "Saturday"];
     for (i = 0, len = days.length; i < len; i++) {
-        str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
+        str_opt_dow += "<option value='" + i + "'>" + days[i] + "</option>\n";
     }
 
     // options for period
     var str_opt_period = "";
     var periods = ["minute", "hour", "day", "week", "month", "year"];
     for (i = 0, len = periods.length; i < len; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
+        str_opt_period += "<option value='" + periods[i] + "'>" + periods[i] + "</option>\n";
     }	
 	
     // display matrix
@@ -158,15 +158,23 @@
         "year"   : ["dom", "month", "time"]
     };
 
-    var combinations = {
-        "minute" : /^(\*\s){4}\*$/,                    // "* * * * *"
-        "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,           // "? * * * *"
-        "day"    : /^(\d{1,2}\s){2}(\*\s){2}\*$/,      // "? ? * * *"
-        "week"   : /^(\d{1,2}\s){2}(\*\s){2}\d{1,2}$/, // "? ? * * ?"
-        "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
-        "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
-    };
-	
+	var indexToField = [
+		"minute",
+		"hour",
+		"day",
+		"month",
+		"week"
+	];
+
+	var combinations = {
+		"minute" : /^(\*\s){4}\*$/,         // "* * * * *"
+		"hour"   : /^.\s(\*\s){3}\*$/,      // "? * * * *"
+		"day"    : /^(.\s){2}(\*\s){2}\*$/, // "? ? * * *"
+		"week"   : /^(.\s){2}(\*\s){2}.$/,	// "? ? * * ?"
+		"month"  : /^(.\s){3}\*\s\*$/,		// "? ? ? * *"
+		"year"   : /^(.\s){4}\*$/           // "? ? ? ? *"
+	};
+
 	var toPosition = {
         "minute" : 0,
         "hour"   : 1,
@@ -208,8 +216,70 @@
 		item.cron_str = cron_str;
 		item.cleanedCron = d.join(' ');
 		return item;
+	}	
+		
+	function fullCronParser(cron_str) {
+		var j, v, tmp, cleanedCron = [], 
+            item = {
+                valid: false,
+                cron_str: cron_str
+            };
+		var singleRegex = /^((\*(\/\d+)?)|(\d+(,\d+)*))$/;
+		// 1. split cron string
+		var parts = cron_str.split(" ");
+		// 2. sanity check
+		if (parts.length != 5) {
+			return item;
+		}
+		// 3. validate and parse repeat time
+		for (j = 0; j < parts.length; j++) {
+			v = parts[j];
+			// validate part
+			if (!singleRegex.test(v)) {
+				return item;
+			}
+            
+            // repeat time
+			if (v.indexOf('/') > 0) {
+				tmp = v.split('/');
+				// replace the value by a placeholder
+				v = '*';	
+				// save repeat time values
+				item.repeatTime = tmp[1]; 
+				item.repeatTimePos = j;
+			}		
+			// set value
+			if (v.indexOf(',') > 0) {
+				item[indexToField[j]] = v.split(',');
+			} else {
+				item[indexToField[j]] = [v];
+			}
+			// try get main entry type
+			if (v === "*") {
+				cleanedCron.push ('*');
+			} else {
+				cleanedCron.push ('x');
+			}
+		}	
+		
+		// 4. get main entry type
+		if (item.repeatTime) {
+			item.cron_type = indexToField[item.repeatTimePos];
+			item.valid = true;
+		} else {
+			tmp = cleanedCron.join(' ');
+			for (t in combinations) {
+				if (combinations[t].test(tmp)) { 
+					item.cron_type = t;
+					item.valid = true;
+					break;
+				}
+			}		
+		}	
+
+		return item;
 	}
-	
+
     function getCronType(cron_str) {
         // check format of initial cron value
         var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/;
