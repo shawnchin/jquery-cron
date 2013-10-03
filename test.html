@@ -1,0 +1,54 @@
+<link type="text/css" href="gentleSelect/jquery-gentleSelect.css" rel="stylesheet" />
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="gentleSelect/jquery-gentleSelect.js"></script>
+<script type="text/javascript" src="cron/jquery-cron.js"></script>
+
+<style>
+    * { position: relative; margin: 0; padding: 0; }
+    html { font-size: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: auto; width: 800px; }
+    html,button,input,select,textarea { font-family: sans-serif; }    
+    .separator-4    { clear: both; height: 4px; }
+    .separator-12   { clear: both; height: 12px; }
+    .box-x-200      { width: 200px; }
+    .box-x-100      { width: 100px; }
+</style>
+
+<div class="separator-12"></div>
+
+<h1>Test Area</h1>
+<h3>JQuery Cron component</h3>
+
+<div class="separator-12"></div>
+
+<div id="myCronSelector"></div>
+
+<div class="separator-12"></div>
+<h4>Current cron value:</h4>
+<div class="separator-4"></div>
+
+<span id="currentCronValue"></span>
+
+<div class="separator-12"></div>
+
+<input type="text" id="myNewValue" class="box-x-200">
+<button id="btn1" class="box-x-100"> Update! </button>
+
+<div class="separator-12"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var sel1 = $('#myCronSelector').cron({
+            initial: "* * * * *",
+            onChange: function() {
+                $('#currentCronValue').text($(this).cron("value"));
+            },
+            useGentleSelect: true
+        });
+
+        sel1.cron("value", "* * * * *");
+
+        $('#btn1').click(function () {
+            sel1.cron("value", $("#myNewValue").val());
+        });
+    });
+</script>
