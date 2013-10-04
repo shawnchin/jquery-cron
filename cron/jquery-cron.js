@@ -396,9 +396,9 @@
 
             // create hour and minutes
             htmlText = "<span class='cron-block cron-block-time'> at ";
-            htmlText =+ "<select name='cron-time-hour' class='cron-time-hour' multiple>" + str_opt_hid;
-            htmlText =+ "</select>:<select name='cron-time-min' class='cron-time-min' multiple>" + str_opt_mih;
-            htmlText =+ "</select> </span>";
+            htmlText += "<select name='cron-time-hour' class='cron-time-hour' multiple>" + str_opt_hid;
+            htmlText += "</select>:<select name='cron-time-min' class='cron-time-min' multiple>" + str_opt_mih;
+            htmlText += "</select> </span>";
             block["time"] = $(htmlText)
                 .appendTo(this)
                 .data("root", this);
