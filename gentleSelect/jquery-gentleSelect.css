@@ -10,7 +10,7 @@
     border-radius: 5px;   
 
     background-repeat: no-repeat; 
-    background-position: center right; 
+    background-position: right center; 
     
     cursor: pointer;
     color: #555;
@@ -31,9 +31,9 @@
     background-color: #fff;
     border: 2px solid #999;
 
-    -moz-box-shadow: 0px 0px 12px #555;
-    -webkit-box-shadow: 0px 0px 12px #555;
-    box-shadow: 0px 0px 12px #555;
+    -moz-box-shadow: 0 0 12px #555;
+    -webkit-box-shadow: 0 0 12px #555;
+    box-shadow: 0 0 12px #555;
 
     margin: 0; padding: 0;
 }
@@ -44,6 +44,12 @@
     padding: 3px 20px 3px 25px;
     
     cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .gentleselect-dialog > ul > li.selected {
     font-weight: bold;
@@ -55,6 +61,16 @@
     background-color: #69c;
     color: #fff;
 }
+
+/* override CSS for lone selected item when disallowEmpty=true */
+.gentleselect-dialog > ul > li.sole-selected {
+    cursor: default;
+}
+.gentleselect-dialog > ul > li.sole-selected:hover {
+    color: #369;
+    background-color: #eee;
+}
+
 
 .gentleselect-dialog > .gentleselect-title {
     display: block;

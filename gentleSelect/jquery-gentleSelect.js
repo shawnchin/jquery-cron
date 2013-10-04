@@ -33,8 +33,9 @@
         closeSpeed      : 400,
         openEffect      : "slide",
         closeEffect     : "slide",
+        disallowEmpty   : false,
         hideOnMouseOut  : true
-    }
+    };
 
     function defined(obj) {
         if (typeof obj == "undefined") { return false; }
@@ -86,29 +87,54 @@
     }
 
     function getSelectedAsText(elemList, opts) { 
+		var arr;
         // If no items selected, return prompt
         if (elemList.length < 1) { return opts.prompt; }
 
         // Truncate if exceed maxDisplay
         if (opts.maxDisplay != 0 && elemList.length > opts.maxDisplay) {
-            var arr = elemList.slice(0, opts.maxDisplay).map(function(){return $(this).text();});
+            arr = elemList.slice(0, opts.maxDisplay).map(function(){return $(this).text();});
             arr.push("...");
         } else {
-            var arr = elemList.map(function(){return $(this).text();});
+            arr = elemList.map(function(){return $(this).text();});
         }
         return arr.get().join(", ");
+    }
+    
+    function updateState(c, o) {
+        var c = $(c);
+        if (c.attr("multiple") && o.disallowEmpty) { 
+            var all_items = c.data("dialog").find("li"),
+                selected_items = all_items.filter(".selected");
+                    
+            // mark element if only one selected
+            all_items.removeClass("sole-selected");
+            if (selected_items.length == 1) {
+              selected_items.addClass("sole-selected");
+            }
+        }
     }
 
     var methods = {
         init : function(options) {
-            var o = $.extend({}, defaults, options);
+            var o = $.extend({}, defaults, options),
+                select_items = this.find("option");
 
-            if (hasError(this, o)) { return this; }; // check for errors
+            if (hasError(this, o)) { return this; } // check for errors
             optionOverrides(this, o); // 
             this.hide(); // hide original select box
             
+            if (this.attr("multiple") && o.disallowEmpty)
+            {
+                if (select_items.length == 0) {
+                    $.error("gentleSelect: disallowEmpty conflicts with empty <select>");
+                }
+                // default to first item if none selected
+                if (this[0].selectedIndex < 0) { this[0].selectedIndex = 0; }
+            }
+            
             // initialise <span> to replace select box
-            label_text = getSelectedAsText(this.find(":selected"), o);
+            var label_text = getSelectedAsText(this.find(":selected"), o);
             var label = $("<span class='gentleselect-label'>" + label_text + "</span>")
                 .insertBefore(this)
                 .bind("mouseenter.gentleselect", event_handlers.labelHoverIn)
@@ -120,7 +146,7 @@
             
             // generate list of options
             var ul = $("<ul></ul>");
-            this.find("option").each(function() { 
+            select_items.each(function() { 
                 var li = $("<li>" + $(this).text() + "</li>")
                     .data("value", $(this).attr("value"))
                     .data("name", $(this).text())
@@ -145,17 +171,18 @@
                 ul.css("float", "left")
                     .find("li").width(o.itemWidth).css("float","left");
                     
+				var cols, rows;
                 var f = ul.find("li:first");
                 var actualWidth = o.itemWidth 
                     + parseInt(f.css("padding-left")) 
                     + parseInt(f.css("padding-right"));
                 var elemCount = ul.find("li").length;
                 if (defined(o.columns)) {
-                    var cols = parseInt(o.columns);
-                    var rows = Math.ceil(elemCount / cols);
+                    cols = parseInt(o.columns);
+                    rows = Math.ceil(elemCount / cols);
                 } else {
-                    var rows = parseInt(o.rows);
-                    var cols = Math.ceil(elemCount / rows);
+                    rows = parseInt(o.rows);
+                    cols = Math.ceil(elemCount / rows);
                 }
                 dialog.width(actualWidth * cols);
 
@@ -166,12 +193,12 @@
 
                 // reorder elements
                 var ptr = [];
-                var idx = 0;
+                var idx = 0, p;
                 ul.find("li").each(function() {
                     if (idx < rows) { 
                         ptr[idx] = $(this); 
                     } else {
-                        var p = idx % rows;
+                        p = idx % rows;
                         $(this).insertAfter(ptr[p]);
                         ptr[p] = $(this);
                     }
@@ -188,6 +215,7 @@
             // ESC key should hide all dialog boxes
             $(document).bind("keyup.gentleselect", event_handlers.keyUp);
 
+            updateState(this, o);
             return this;
         },
 
@@ -208,7 +236,24 @@
             var label = getSelectedAsText(this.find(":selected"), opts);
             this.data("label").text(label);
             
+            updateState(this, opts);
             return this;
+		},
+        
+        // clear all selections
+        clear : function() {
+            // Check for disallowEmpty option
+            if (this.data("options").disallowEmpty) {
+              $.error("gentleSelect: cannot use 'clear' when disallowEmpty=true");
+              return this;
+            }
+
+            // Deselect all options.
+            // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-85676760
+            this[0].selectedIndex = -1;
+
+            // Update dialog
+            return methods["update"].call(this);
         }
     };
 
@@ -260,15 +305,22 @@
             if (clicked.is("li") && !clicked.hasClass("gentleselect-dummy")) {
                 var value = clicked.data("value");
                 var name = clicked.data("name");
-                var label = $this.data("label")
+                var label = $this.data("label");
 
                 if ($this.data("root").attr("multiple")) {
+                    if (opts.disallowEmpty 
+                          && clicked.hasClass("selected") 
+                          && (root.find(":selected").length == 1)) {
+                        // sole item clicked. For now, do nothing.
+                        return;
+                    }
                     clicked.toggleClass("selected");
                     var s = $this.find("li.selected");
                     label.text(getSelectedAsText(s, opts));
                     var v = s.map(function(){ return $(this).data("value"); });
                     // update actual selectbox and trigger change event
                     root.val(v.get()).trigger("change");
+                    updateState(root, opts);
                 } else {
                     $this.find("li.selected").removeClass("selected");
                     clicked.addClass("selected");
@@ -280,7 +332,7 @@
         },
 
         keyUp : function(e) {
-            if (e.keyCode == 27 ) { // ESC
+            if (e.keyCode === 27 ) { // ESC
                 $(".gentleselect-dialog").hide();
             }
         }
