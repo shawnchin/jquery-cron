@@ -1,5 +1,5 @@
 /*
- * jQuery gentleSelect plugin (version 0.1.4)
+ * jQuery gentleSelect plugin (version 0.1.4.1)
  * http://shawnchin.github.com/jquery-cron
  *
  * Copyright (c) 2010-2013 Shawn Chin.
@@ -175,13 +175,21 @@
         return (!defined(obj) || typeof obj == "object")
     }
 
-    function getCronType(cron_str) {
+    function getCronType(cron_str, opts) {
+        // if customValues defined, check for matches there first
+        if (defined(opts.customValues)) {
+            for (key in opts.customValues) {
+                if (cron_str == opts.customValues[key]) { return key; }
+            }
+        }
+
         // check format of initial cron value
         var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
         }
+
         // check actual cron values
         var d = cron_str.split(" ");
         //            mm, hh, DD, MM, DOW
@@ -207,8 +215,20 @@
     }
 
     function hasError(c, o) {
-        if (!defined(getCronType(o.initial))) { return true; }
+        if (!defined(getCronType(o.initial, o))) { return true; }
         if (!undefinedOrObject(o.customValues)) { return true; }
+
+        // ensure that customValues keys do not coincide with existing fields
+        if (defined(o.customValues)) {
+            for (key in o.customValues) {
+                if (combinations.hasOwnProperty(key)) {
+                    $.error("cron: reserved keyword '" + key +
+                            "' should not be used as customValues key.");
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -365,38 +385,42 @@
             // when no args, act as getter
             if (!cron_str) { return getCurrentValue(this); }
 
-            var t = getCronType(cron_str);
-            if (!defined(t)) { return false; }
-
+            var o = this.data('options');
             var block = this.data("block");
-            var d = cron_str.split(" ");
-            var v = {
-                "mins"  : d[0],
-                "hour"  : d[1],
-                "dom"   : d[2],
-                "month" : d[3],
-                "dow"   : d[4]
-            };
+            var useGentleSelect = o.useGentleSelect;
+            var t = getCronType(cron_str, o);
+            
+            if (!defined(t)) { return false; }
+            
+            if (defined(o.customValues) && o.customValues.hasOwnProperty(t)) {
+                t = o.customValues[t];
+            } else {
+                var d = cron_str.split(" ");
+                var v = {
+                    "mins"  : d[0],
+                    "hour"  : d[1],
+                    "dom"   : d[2],
+                    "month" : d[3],
+                    "dow"   : d[4]
+                };
 
-            // is gentleSelect enabled
-            var useGentleSelect = this.data('options').useGentleSelect;
+                // update appropriate select boxes
+                var targets = toDisplay[t];
+                for (var i = 0; i < targets.length; i++) {
+                    var tgt = targets[i];
+                    if (tgt == "time") {
+                        var btgt = block[tgt].find("select.cron-time-hour").val(v["hour"]);
+                        if (useGentleSelect) btgt.gentleSelect("update");
 
-            // update appropriate select boxes
-            var targets = toDisplay[t];
-            for (var i = 0; i < targets.length; i++) {
-                var tgt = targets[i];
-                if (tgt == "time") {
-                    var btgt = block[tgt].find("select.cron-time-hour").val(v["hour"]);
-                    if (useGentleSelect) btgt.gentleSelect("update");
-
-                    btgt = block[tgt].find("select.cron-time-min").val(v["mins"]);
-                    if (useGentleSelect) btgt.gentleSelect("update");
-                } else {;
-                    var btgt = block[tgt].find("select").val(v[tgt]);
-                    if (useGentleSelect) btgt.gentleSelect("update");
+                        btgt = block[tgt].find("select.cron-time-min").val(v["mins"]);
+                        if (useGentleSelect) btgt.gentleSelect("update");
+                    } else {;
+                        var btgt = block[tgt].find("select").val(v[tgt]);
+                        if (useGentleSelect) btgt.gentleSelect("update");
+                    }
                 }
             }
-
+            
             // trigger change event
             var bp = block["period"].find("select").val(t);
             if (useGentleSelect) bp.gentleSelect("update");
