@@ -1,5 +1,5 @@
 /*
- * jQuery gentleSelect plugin (version 0.1.4)
+ * jQuery gentleSelect plugin (version 0.1.4.1)
  * http://shawnchin.github.com/jquery-cron
  *
  * Copyright (c) 2010-2013 Shawn Chin.
