@@ -51,7 +51,7 @@
             useGentleSelect: true
         });
         $('#example3').cron({
-            initial: "42 3 * * 5",
+            initial: "*/5 * * * *",
             onChange: function() {
                 $('#example3-val').text($(this).cron("value"));
             },
@@ -327,6 +327,7 @@ $('#selector').cron({
     For example, the following adds two additional entries to the selection:
         <pre>
 $('#selector').cron({
+    initial: "*/5 * * * *",
     customValues: {
         "5 Minutes" : "*/5 * * * *",
         "2 Hours on Weekends" : "0 */2 * * 5,6"
