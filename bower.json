@@ -4,5 +4,16 @@
   "version": "0.1.4",
   "main": [
     "./cron/jquery-cron.js"
+  ],
+  "authors": [
+    "mvilner <shootermv@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
   ]
 }
