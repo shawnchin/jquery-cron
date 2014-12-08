@@ -6,7 +6,7 @@
     "./cron/jquery-cron.js"
   ],
   "authors": [
-    "mvilner <shootermv@gmail.com>"
+    "Shawn Chin"
   ],
   "license": "MIT",
   "ignore": [
