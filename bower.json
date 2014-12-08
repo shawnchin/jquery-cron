@@ -1,17 +1,8 @@
 {
   "name": "jquery-cron",
-  "homepage": "https://github.com/shawnchin/jquery-cron",
+  "homepage": "https://github.com/shootermv/jquery-cron",
   "version": "0.1.4",
-  "_release": "0.1.4",
-  "_resolution": {
-    "type": "version",
-    "tag": "v0.1.4",
-    "commit": "6f52d687627fcd04fb0d3f6ae6c08837267ef0dc"
-  },
   "main": [
     "./cron/jquery-cron.js"
-  ],
-  "_source": "https://github.com/shawnchin/jquery-cron.git",
-  "_target": "*",
-  "_originalSource": "https://github.com/shawnchin/jquery-cron.git"
+  ]
 }
