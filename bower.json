@@ -1,7 +1,7 @@
 {
   "name": "jquery-cron",
   "homepage": "https://github.com/shootermv/jquery-cron",
-  "version": "0.1.4",
+  "version": "0.1.4.2",
   "main": [
     "./cron/jquery-cron.js"
   ],
