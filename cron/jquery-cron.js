@@ -90,6 +90,7 @@
             closeEffect    : "slide",
             hideOnMouseOut : true
         },
+        periods : ["minute", "hour", "day", "week", "month", "year"],
         url_set : undefined,
         customValues : undefined,
         onChange: undefined, // callback function each time value changes
@@ -137,13 +138,6 @@
                 "Friday", "Saturday"];
     for (var i = 0; i < days.length; i++) {
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
-    }
-
-    // options for period
-    var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
-    for (var i = 0; i < periods.length; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
     }
 
     // display matrix
@@ -298,6 +292,12 @@
 
             // ---- define select boxes in the right order -----
 
+            // options for period
+            var str_opt_period = "";
+            for (var i = 0; i < o.periods.length; i++) {
+                str_opt_period += "<option value='" + o.periods[i] + "'>" + o.periods[i] + "</option>\n";
+            }
+
             var block = [], custom_periods = "", cv = o.customValues;
             if (defined(cv)) { // prepend custom values if specified
                 for (var key in cv) {
@@ -389,9 +389,9 @@
             var block = this.data("block");
             var useGentleSelect = o.useGentleSelect;
             var t = getCronType(cron_str, o);
-            
+
             if (!defined(t)) { return false; }
-            
+
             if (defined(o.customValues) && o.customValues.hasOwnProperty(t)) {
                 t = o.customValues[t];
             } else {
@@ -420,7 +420,7 @@
                     }
                 }
             }
-            
+
             // trigger change event
             var bp = block["period"].find("select").val(t);
             if (useGentleSelect) bp.gentleSelect("update");
