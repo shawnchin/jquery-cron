@@ -136,7 +136,7 @@
     var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
                 "Friday", "Saturday"];
     for (var i = 0; i < days.length; i++) {
-        str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
+        str_opt_dow += "<option value='"+(i+1)+"'>" + days[i] + "</option>\n";
     }
 
     // options for period
