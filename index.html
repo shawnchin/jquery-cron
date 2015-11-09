@@ -68,6 +68,10 @@
             },
             useGentleSelect: true
         });
+        $('#example5').cron({
+            periods: ["day", "year"],
+            useGentleSelect: true
+        });		
     });
     </script>
 </head>
@@ -354,6 +358,26 @@ $('#selector').cron({
         </li>
     </ul>
     </p>
+	
+    <h3 id='option-customvalues'>Specify periods to display</h3>
+    <p>
+    The list of selectable cron periods can be specified using the <tt>periods</tt>
+    option. This allows you to specify an array of periods to display.
+    </p>
+    <p>
+    For example, the following displays only day and year period selections:
+        <pre>
+$('#selector').cron({
+    periods: ["day", "year"]
+});
+</pre>
+    </p>
+
+    <div class='example'>
+        <div id='example5'></div>
+        <p><span class='example-text' id='example5-val'></span></p>
+    </div>
+	
     <h2>Methods</h2>
     <h3 id='method-value'>value</h3>
     <p>
