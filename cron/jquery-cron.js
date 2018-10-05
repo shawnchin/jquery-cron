@@ -138,6 +138,8 @@
     for (var i = 0; i < days.length; i++) {
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
     }
+    str_opt_dow += "<option value='1-5'>Weekdays</option>\n";
+    str_opt_dow += "<option value='0,6'>Weekends</option>\n";
 
     // options for period
     var str_opt_period = "";
