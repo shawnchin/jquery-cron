@@ -344,7 +344,7 @@
             if (o.useGentleSelect) select.gentleSelect(o.minuteOpts);
 
             block["dow"] = $("<span class='cron-block cron-block-dow'>"
-                    + " on <select name='cron-dow'>" + str_opt_dow
+                    + " on <select name='cron-dow' multiple>" + str_opt_dow
                     + "</select> </span>")
                 .appendTo(this)
                 .data("root", this);
