@@ -41,6 +41,7 @@
 
     var defaults = {
         initial : "* * * * *",
+		periods: ["minute", "hour", "day", "week", "month", "year"],
         minuteOpts : {
             minWidth  : 100, // only applies if columns and itemWidth not set
             itemWidth : 30,
@@ -137,13 +138,6 @@
                 "Friday", "Saturday"];
     for (var i = 0; i < days.length; i++) {
         str_opt_dow += "<option value='"+i+"'>" + days[i] + "</option>\n";
-    }
-
-    // options for period
-    var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
-    for (var i = 0; i < periods.length; i++) {
-        str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
     }
 
     // display matrix
@@ -285,6 +279,7 @@
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
             $.extend(o, {
+				periods        : options.periods && options.periods.length > 0 ? options.periods : defaults.periods,
                 minuteOpts     : $.extend({}, defaults.minuteOpts, eo, options.minuteOpts),
                 domOpts        : $.extend({}, defaults.domOpts, eo, options.domOpts),
                 monthOpts      : $.extend({}, defaults.monthOpts, eo, options.monthOpts),
@@ -295,6 +290,13 @@
 
             // error checking
             if (hasError(this, o)) { return this; }
+			
+            // options for period
+            var str_opt_period = "";
+            var periods = o.periods;
+            $.each(periods, function (index, value) {
+                str_opt_period += "<option value='" + value + "'>" + value + "</option>\n";
+            })			
 
             // ---- define select boxes in the right order -----
 
