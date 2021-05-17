@@ -35,6 +35,6 @@ Copyright (c) 2010-2013, Shawn Chin.
 This project is licensed under the [MIT license].
 
  [jQuery]: http://jquery.com "jQuery"
- [jquery-cron]: http://shawnchin.github.com/jquery-cron "jquery-cron"
- [jquery-gentleSelect]: http://shawnchin.github.com/jquery-gentleSelect "jquery-gentleSelect"
+ [jquery-cron]: http://shawnchin.github.io/jquery-cron "jquery-cron"
+ [jquery-gentleSelect]: http://shawnchin.github.io/jquery-gentleSelect "jquery-gentleSelect"
  [MIT License]: http://www.opensource.org/licenses/mit-license.php "MIT License"
